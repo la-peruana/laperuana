@@ -454,22 +454,29 @@
       document.getElementById('carritoWhatsApp').href = generarLinkWhatsApp();
     }
 
-    function generarLinkWhatsApp() {
-      let mensaje = "¡Hola! Quiero hacer el siguiente pedido:";
-      let total = 0;
-      Object.keys(carrito).forEach(key => {
-        const [sidx, pidx] = key.split('_').map(Number);
-        const p = secciones[sidx].productos[pidx];
-        const cant = carrito[key];
-        if (cant > 0) {
-          mensaje += `- ${p.nombre} x${cant} = $${(cant*p.precio).toLocaleString('es-AR')}\n`;
-          total += cant*p.precio;
-        }
-      });
-      mensaje += `Total: $${total.toLocaleString('es-AR')}`;
-      const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-      window.open(whatsappURL, '_blank');
+   function generarLinkWhatsApp() {
+  let mensaje = "¡Hola! Quiero hacer el siguiente pedido:%0A";
+  let total = 0;
+
+  Object.keys(carrito).forEach(key => {
+    const [sidx, pidx] = key.split('_').map(Number);
+    const p = secciones[sidx].productos[pidx];
+    const cant = carrito[key];
+    if (cant > 0) {
+      mensaje += `- ${p.nombre} x${cant} = $${(cant * p.precio).toLocaleString('es-AR')}\n`;
+      total += cant * p.precio;
     }
+  });
+
+  mensaje += `Total: $${total.toLocaleString('es-AR')}`;
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Usa wa.me en celulares y web.whatsapp.com en PC
+  return isMobile
+    ? `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`
+    : `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMERO}&text=${encodeURIComponent(mensaje)}`;
+}
 
     // Modal mostrar/ocultar
     document.getElementById('abrirCarritoBtn').onclick = ()=>{
