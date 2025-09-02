@@ -48,7 +48,7 @@
       margin-bottom: 2.2em;
     }
     .seccion-titulo {
-      color: var(--black-principal);
+      color: var(--white-principal);
       font-family: 'Monserrat', sans-serif;
       font-size: 2em;
       margin: 1em 0 0.7em 0;
@@ -89,7 +89,7 @@
     .producto-nombre {
       font-weight: 700;
       font-size: 1.1em;
-      color: var(--rojo-principal);
+      color: var(--black-principal);
       margin-bottom: 0.3em;
       text-align: center;
     }
@@ -269,7 +269,7 @@
 </head>
 <body>
   <header>
-    <img src="https://raw.githubusercontent.com/la-peruana/laperuana/main/nuevo-logo-la-peruana.jpg" alt="Logo La Peruana" class="logo">
+    <img src="https://raw.githubusercontent.com/la-peruana/laperuana/main/logo-la-peruana.jpg" alt="Logo La Peruana" class="logo">
     </header>
   <main id="main"></main>
   <button class="carrito-fab" id="abrirCarritoBtn" title="Ver carrito">
@@ -455,7 +455,7 @@
     }
 
     function generarLinkWhatsApp() {
-      let mensaje = "¡Hola! Quiero hacer el siguiente pedido:%0A";
+      let mensaje = "¡Hola! Quiero hacer el siguiente pedido:";
       let total = 0;
       Object.keys(carrito).forEach(key => {
         const [sidx, pidx] = key.split('_').map(Number);
@@ -467,7 +467,8 @@
         }
       });
       mensaje += `Total: $${total.toLocaleString('es-AR')}`;
-      return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+      const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+      window.open(whatsappURL, '_blank');
     }
 
     // Modal mostrar/ocultar
