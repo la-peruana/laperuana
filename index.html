@@ -467,9 +467,9 @@
         }
       });
       mensaje += `Total: $${total.toLocaleString('es-AR')}`;
-      const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-      window.open(whatsappURL, '_blank');
-    }
+      const whatsappURL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
+  window.open(whatsappURL, '_blank');
+    };
 
     // Modal mostrar/ocultar
     document.getElementById('abrirCarritoBtn').onclick = ()=>{
