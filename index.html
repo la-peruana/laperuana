@@ -454,37 +454,81 @@
       document.getElementById('carritoWhatsApp').href = generarLinkWhatsApp();
     }
 
-    function generarLinkWhatsApp() {
-      let mensaje = "¡Hola! Quiero hacer el siguiente pedido:";
-      let total = 0;
-      Object.keys(carrito).forEach(key => {
-        const [sidx, pidx] = key.split('_').map(Number);
-        const p = secciones[sidx].productos[pidx];
-        const cant = carrito[key];
-        if (cant > 0) {
-          mensaje += `- ${p.nombre} x${cant} = $${(cant*p.precio).toLocaleString('es-AR')}\n`;
-          total += cant*p.precio;
-        }
-      });
-      mensaje += `Total: $${total.toLocaleString('es-AR')}`;
-      const whatsappURL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
-      window.open(whatsappURL, '_blank');
+    <script>
+function sendWhatsAppOrder() {
+  const WHATSAPP_NUMBER = "5493435075991"; // Número configurado
+
+  // Datos del formulario
+  const name = document.getElementById('customer-name').value.trim();
+  const phone = document.getElementById('customer-phone').value.trim();
+  const address = document.getElementById('customer-address').value.trim();
+  const comments = document.getElementById('customer-comments').value.trim();
+
+  if (!name || !phone || !address) {
+    alert('⚠️ Por favor completa todos los campos obligatorios');
+    return;
+  }
+  if (!selectedPayment) {
+    alert('⚠️ Por favor selecciona un medio de pago');
+    return;
+  }
+  if (Object.keys(cart).length === 0) {
+    alert('⚠️ Tu carrito está vacío');
+    return;
+  }
+
+  // Armar el mensaje
+  let message = `🛒 *NUEVO PEDIDO - LA PERUANA SRL*\n\n`;
+  message += `👤 *Cliente:* ${name}\n`;
+  message += `📱 *Teléfono:* ${phone}\n`;
+  message += `📍 *Dirección:* ${address}\n\n`;
+  message += `📋 *PEDIDO:*\n━━━━━━━━━━━━━━━━━━━\n`;
+
+  for (let productId in cart) {
+    if (products[productId]) {
+      const product = products[productId];
+      const qty = cart[productId];
+      const subtotal = product.price * qty;
+      message += `• ${product.name}\n`;
+      message += `  ${qty} ${product.unit}(s) × ${product.price.toLocaleString('es-AR')} = ${subtotal.toLocaleString('es-AR')}\n\n`;
     }
+  }
 
-    // Modal mostrar/ocultar
-    document.getElementById('abrirCarritoBtn').onclick = ()=>{
-      renderCarrito();
-      document.getElementById('modalCarritoBg').classList.add('active');
-    };
-    document.getElementById('cerrarCarritoBtn').onclick = ()=>{
-      document.getElementById('modalCarritoBg').classList.remove('active');
-    };
-    document.getElementById('modalCarritoBg').onclick = function(e){
-      if (e.target === this) this.classList.remove('active');
-    };
+  message += `━━━━━━━━━━━━━━━━━━━\n`;
+  message += `💰 *TOTAL: ${total.toLocaleString('es-AR')}*\n\n`;
 
-    renderSecciones();
-    actualizarFab();
-  </script>
+  // Medio de pago
+  message += `💳 *MEDIO DE PAGO:* `;
+  if (selectedPayment === 'mercadopago') {
+    message += `📱 Mercado Pago\n\n`;
+  } else if (selectedPayment === 'transferencia') {
+    message += `🏦 Transferencia Bancaria\nAlias: *laperuanasrl*\n⚠️ Enviar comprobante\n\n`;
+  } else {
+    message += `💵 Efectivo - Pago al recibir\n\n`;
+  }
+
+  if (comments) {
+    message += `💬 *Comentarios:* ${comments}\n\n`;
+  }
+
+  message += `⏰ Fecha: ${new Date().toLocaleString('es-AR')}\n`;
+  message += `🤖 Pedido generado automáticamente`;
+
+  // Codificar mensaje
+  const encodedMessage = encodeURIComponent(message);
+
+  // ✅ Forzar WhatsApp Web en PC
+  const whatsappURL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
+
+  // Abrir en pestaña nueva
+  window.open(whatsappURL, '_blank');
+
+  // Confirmación
+  alert('✅ ¡Pedido enviado! Se abrirá WhatsApp Web para confirmar.');
+
+  // Cerrar formulario
+  hideCustomerForm();
+}
+</script>
 </body>
 </html>
