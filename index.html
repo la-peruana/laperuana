@@ -468,8 +468,8 @@
       });
       mensaje += `Total: $${total.toLocaleString('es-AR')}`;
       const whatsappURL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
-  window.open(whatsappURL, '_blank');
-    };
+      window.open(whatsappURL, '_blank');
+    }
 
     // Modal mostrar/ocultar
     document.getElementById('abrirCarritoBtn').onclick = ()=>{
