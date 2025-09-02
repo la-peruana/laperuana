@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Peruana | Supermercado Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rojo-principal: #e54244;
+      --rojo-gradiente: #d73a45;
+      --blanco: #fff;
+      --amarillo: #ffe059;
+      --gris: #f9f9f9;
+      --verde-whatsapp: #25D366;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: var(--blanco);
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem 1rem;
+      background: transparent;
+    }
+    .logo {
+      max-width: 420px;
+      width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+      margin-bottom: 0.7em;
+    }
+    .slogan {
+      color: var(--rojo-principal);
+      font-size: 1.2em;
+      margin-bottom: 0.5em;
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .seccion {
+      margin-bottom: 2.2em;
+    }
+    .seccion-titulo {
+      color: var(--rojo-principal);
+      font-family: 'Monserrat', sans-serif;
+      font-size: 2em;
+      margin: 1em 0 0.7em 0;
+      letter-spacing: 0.03em;
+      border-bottom: 2px solid var(--rojo-principal);
+      display: inline-block;
+      padding-bottom: 0.2em;
+      background: var(--blanco);
+    }
+    .productos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.3rem;
+    }
+    .producto {
+      background: var(--gris);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1em;
+      transition: transform 0.18s;
+      position: relative;
+    }
+    .producto:hover {
+      transform: scale(1.04);
+    }
+    .producto-img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 0.7em;
+      background: #eee;
+    }
+    .producto-nombre {
+      font-weight: 700;
+      font-size: 1.1em;
+      color: var(--rojo-principal);
+      margin-bottom: 0.3em;
+      text-align: center;
+    }
+    .producto-precio {
+      color: #333;
+      font-size: 1.1em;
+      margin-bottom: 0.6em;
+    }
+    .cantidad-ctrl {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.6em;
+      gap: 0.5em;
+    }
+    .btn-cantidad {
+      background: var(--rojo-principal);
+      color: var(--blanco);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2em;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-cantidad:active {
+      background: var(--rojo-gradiente);
+    }
+    .cantidad-num {
+      width: 32px;
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: var(--rojo-principal);
+    }
+    .carrito-fab {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      background: var(--rojo-principal);
+      color: var(--blanco);
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      padding: 0.8em 1.4em;
+      font-size: 1.15em;
+      z-index: 99;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      font-weight: bold;
+    }
+    .carrito-fab svg {
+      width: 1.4em;
+      height: 1.4em;
+      vertical-align: middle;
+    }
+    .carrito-cantidad {
+      background: var(--amarillo);
+      color: #a60009;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.97em;
+      min-width: 28px;
+      text-align: center;
+      padding: 0.1em 0.5em;
+      margin-left: 0.2em;
+    }
+    .modal-carrito-bg {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.35);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-carrito-bg.active { display: flex; }
+    .modal-carrito {
+      background: var(--blanco);
+      border-radius: 18px;
+      max-width: 420px;
+      width: 98vw;
+      padding: 2em 1.2em 1.2em 1.2em;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.19);
+      position: relative;
+      animation: fadein .15s;
+    }
+    @keyframes fadein { from { opacity: 0; transform: scale(0.97);} to {opacity: 1; transform: scale(1);} }
+    .modal-carrito h2 {
+      margin-top: 0;
+      color: var(--rojo-principal);
+      text-align: center;
+    }
+    .modal-carrito .cerrar {
+      position: absolute;
+      top: 0.7em;
+      right: 1em;
+      background: transparent;
+      border: none;
+      font-size: 1.5em;
+      color: var(--rojo-gradiente);
+      cursor: pointer;
+    }
+    .carrito-items-list {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 1em;
+      margin-top: 1em;
+    }
+    .carrito-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7em;
+      padding: 0.55em 0;
+      border-bottom: 1px solid #e5e5e5;
+      font-size: 1.04em;
+    }
+    .carrito-item-nombre {
+      flex: 1;
+    }
+    .carrito-item-cantidad {
+      min-width: 40px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--rojo-principal);
+    }
+    .carrito-item-precio {
+      min-width: 65px;
+      text-align: right;
+      color: #333;
+    }
+    .carrito-total {
+      text-align: right;
+      font-size: 1.23em;
+      font-weight: bold;
+      margin-bottom: 1.2em;
+      color: var(--rojo-principal);
+    }
+    .btn-whatsapp {
+      display: block;
+      width: 100%;
+      background: var(--verde-whatsapp);
+      color: var(--blanco);
+      font-weight: bold;
+      border: none;
+      border-radius: 24px;
+      padding: 0.8em 0;
+      font-size: 1.1em;
+      text-decoration: none;
+      transition: background 0.2s;
+      cursor: pointer;
+      margin-top: .4em;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .btn-whatsapp:hover { background: #1ebe57; }
+    .carrito-vacio {
+      text-align: center;
+      color: #888;
+      margin-top: 1.5em;
+      font-style: italic;
+    }
+    @media (max-width: 600px) {
+      main { padding: 1rem 0.3rem; }
+      .productos-grid { gap: 1rem; }
+      .modal-carrito { padding: 1.2em 0.5em 0.5em 0.5em; }
+      .seccion-titulo { font-size: 1.3em; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://github.com/AndresGamarci/superdigital-demo2/blob/main/LOGO-LA-PERUANA.jpg" alt="Logo La Peruana" class="logo">
+    </header>
+  <main id="main"></main>
+  <button class="carrito-fab" id="abrirCarritoBtn" title="Ver carrito">
+    <svg fill="none" viewBox="0 0 24 24"><path fill="#fff" d="M7 20a2 2 0 11.001-3.999A2 2 0 017 20zm10 0a2 2 0 11.001-3.999A2 2 0 0117 20zM7.16 17h9.69c.87 0 1.64-.56 1.89-1.38l2.22-7.06A1 1 0 0020 7H6.21l-.94-2.36A1 1 0 004.34 4H2a1 1 0 100 2h1.34l3.6 9.36-1.35 2.44A1 1 0 006 19h13a1 1 0 100-2H7.42l.74-1.35z"/></svg>
+    <span>Carrito</span>
+    <span class="carrito-cantidad" id="carritoCantidad">0</span>
+  </button>
+  <div class="modal-carrito-bg" id="modalCarritoBg">
+    <div class="modal-carrito">
+      <button class="cerrar" id="cerrarCarritoBtn" title="Cerrar">&times;</button>
+      <h2>Tu Carrito</h2>
+      <div class="carrito-items-list" id="carritoLista"></div>
+      <div class="carrito-total" id="carritoTotal"></div>
+      <a class="btn-whatsapp" id="carritoWhatsApp" target="_blank">Enviar pedido por WhatsApp</a>
+    </div>
+  </div>
+  <script>
+    // Cambia este número por tu WhatsApp (sin + y sin espacios, ej: 5493436123456)
+    const WHATSAPP_NUMERO = "5493435075991";
+
+    // Estructura con 11 secciones y productos ejemplo para cada una (agrega hasta 100 productos)
+    const secciones = [
+      { nombre: "LACTEOS", productos: [
+        { nombre: "Leche Entera 1L", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Queso Cremoso 300g", precio: 1400, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Yogur Bebible 1L", precio: 1450, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Manteca 200g", precio: 850, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Queso Rallado 100g", precio: 700, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "ALMACEN", productos: [
+        { nombre: "Arroz Largo Fino 1Kg", precio: 800, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Fideos Spaghetti 500g", precio: 600, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Harina 000 1Kg", precio: 700, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Azúcar 1Kg", precio: 950, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Sal Fina 500g", precio: 250, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "BEBIDAS", productos: [
+        { nombre: "Gaseosa Cola 2.25L", precio: 2000, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Agua Mineral 2L", precio: 900, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Jugo en Polvo", precio: 250, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Cerveza 1L", precio: 1300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Vino Tinto 750ml", precio: 2600, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "CARNICERIA", productos: [
+        { nombre: "Carne Picada 1Kg", precio: 4500, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Pollo Entero", precio: 3200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Asado 1Kg", precio: 6300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Milanesa de Carne 1Kg", precio: 5200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Chorizo 1Kg", precio: 3400, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "VERDULERIA", productos: [
+        { nombre: "Papas 1Kg", precio: 650, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Cebolla 1Kg", precio: 700, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Tomate 1Kg", precio: 1100, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Zanahoria 1Kg", precio: 690, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Bananas 1Kg", precio: 1100, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "LIMPIEZA", productos: [
+        { nombre: "Lavandina 1L", precio: 350, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Jabón en Polvo 800g", precio: 1100, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Detergente 500ml", precio: 480, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Esponja x3", precio: 350, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Desodorante de Piso", precio: 1200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "HIGIENE PERSONAL", productos: [
+        { nombre: "Shampoo 400ml", precio: 1100, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Jabón de Tocador x3", precio: 900, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Papel Higiénico x4", precio: 950, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Dentífrico 90g", precio: 780, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Toalla Femenina x8", precio: 850, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "FIAMBRERIA", productos: [
+        { nombre: "Jamón Cocido 200g", precio: 1300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Queso Port Salut 300g", precio: 1600, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Mortadela 200g", precio: 750, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Salame 200g", precio: 1600, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Queso de Máquina 200g", precio: 1400, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "PANADERIA", productos: [
+        { nombre: "Pan Francés 1Kg", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Pan de Molde", precio: 900, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Bizcochos Salados", precio: 700, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Tostadas Integrales", precio: 800, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Pan Casero", precio: 950, imagen: "fotos/pan_casero.jpg" }
+      ]},
+      { nombre: "PASTELERIA", productos: [
+        { nombre: "Alfajores x6", precio: 1320, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Torta de Chocolate", precio: 2500, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Facturas x6", precio: 1800, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Chocotorta", precio: 2200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Galletitas de Manteca", precio: 850, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
+      ]},
+      { nombre: "ROTISERIA", productos: [
+        { nombre: "Empanadas Docena", precio: 3000, imagen: "fotos/empanadas.jpg" },
+        { nombre: "Tarta de Pollo", precio: 1400, imagen: "fotos/tarta_pollo.jpg" },
+        { nombre: "Milanesas de Pollo x6", precio: 2500, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Tortilla de Papas", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
+        { nombre: "Pizza", precio: 2300, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
+      ]}
+    ];
+
+    // Carrito: { [seccionIdx_productoIdx]: cantidad }
+    let carrito = {};
+
+    // Renderizado de secciones y productos
+    function renderSecciones() {
+      const main = document.getElementById('main');
+      main.innerHTML = '';
+      secciones.forEach((seccion, sidx) => {
+        const divSec = document.createElement('section');
+        divSec.className = 'seccion';
+        divSec.innerHTML = `<h2 class="seccion-titulo">${seccion.nombre}</h2>`;
+        const grid = document.createElement('div');
+        grid.className = 'productos-grid';
+
+        seccion.productos.forEach((prod, pidx) => {
+          const key = `${sidx}_${pidx}`;
+          const card = document.createElement('div');
+          card.className = 'producto';
+          card.innerHTML = `
+            <img class="producto-img" src="${prod.imagen}" alt="${prod.nombre}">
+            <div class="producto-nombre">${prod.nombre}</div>
+            <div class="producto-precio">$${prod.precio.toLocaleString('es-AR')}</div>
+            <div class="cantidad-ctrl">
+              <button class="btn-cantidad" data-key="${key}" data-action="restar">-</button>
+              <span class="cantidad-num" id="cantidad-${key}">${carrito[key]||0}</span>
+              <button class="btn-cantidad" data-key="${key}" data-action="sumar">+</button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+        divSec.appendChild(grid);
+        main.appendChild(divSec);
+      });
+    }
+
+    // Manejo de sumar/restar
+    document.addEventListener('click', e => {
+      if(e.target.classList.contains('btn-cantidad')) {
+        const key = e.target.dataset.key;
+        if(!(key in carrito)) carrito[key]=0;
+        if(e.target.dataset.action === 'sumar') carrito[key]++;
+        if(e.target.dataset.action === 'restar' && carrito[key]>0) carrito[key]--;
+        if(carrito[key]===0) delete carrito[key];
+        document.getElementById(`cantidad-${key}`).textContent = carrito[key]||0;
+        actualizarFab();
+      }
+    });
+
+    // Carrito FAB y Modal
+    function actualizarFab() {
+      const total = Object.values(carrito).reduce((a,b)=>a+b,0);
+      document.getElementById('carritoCantidad').textContent = total;
+    }
+
+    function renderCarrito() {
+      const lista = document.getElementById('carritoLista');
+      lista.innerHTML = '';
+      let total = 0;
+      Object.keys(carrito).forEach(key => {
+        const [sidx, pidx] = key.split('_').map(Number);
+        const p = secciones[sidx].productos[pidx];
+        const cant = carrito[key];
+        if (cant > 0) {
+          const subtotal = cant * p.precio;
+          total += subtotal;
+          const div = document.createElement('div');
+          div.className = 'carrito-item';
+          div.innerHTML = `
+            <span class="carrito-item-nombre">${p.nombre}</span>
+            <span class="carrito-item-cantidad">${cant}</span>
+            <span class="carrito-item-precio">$${subtotal.toLocaleString('es-AR')}</span>
+          `;
+          lista.appendChild(div);
+        }
+      });
+      if (total === 0) {
+        lista.innerHTML = '<div class="carrito-vacio">¡El carrito está vacío!</div>';
+      }
+      document.getElementById('carritoTotal').textContent = total > 0 ? `Total: $${total.toLocaleString('es-AR')}` : '';
+      document.getElementById('carritoWhatsApp').style.display = total>0 ? 'block' : 'none';
+      document.getElementById('carritoWhatsApp').href = generarLinkWhatsApp();
+    }
+
+    function generarLinkWhatsApp() {
+      let mensaje = "¡Hola! Quiero hacer el siguiente pedido:%0A";
+      let total = 0;
+      Object.keys(carrito).forEach(key => {
+        const [sidx, pidx] = key.split('_').map(Number);
+        const p = secciones[sidx].productos[pidx];
+        const cant = carrito[key];
+        if (cant > 0) {
+          mensaje += `- ${p.nombre} x${cant} = $${(cant*p.precio).toLocaleString('es-AR')}\n`;
+          total += cant*p.precio;
+        }
+      });
+      mensaje += `Total: $${total.toLocaleString('es-AR')}`;
+      return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+    }
+
+    // Modal mostrar/ocultar
+    document.getElementById('abrirCarritoBtn').onclick = ()=>{
+      renderCarrito();
+      document.getElementById('modalCarritoBg').classList.add('active');
+    };
+    document.getElementById('cerrarCarritoBtn').onclick = ()=>{
+      document.getElementById('modalCarritoBg').classList.remove('active');
+    };
+    document.getElementById('modalCarritoBg').onclick = function(e){
+      if (e.target === this) this.classList.remove('active');
+    };
+
+    renderSecciones();
+    actualizarFab();
+  </script>
+</body>
+</html>
