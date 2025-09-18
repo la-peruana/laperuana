@@ -1,497 +1,661 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Peruana | Supermercado Online</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>La Peruana — Tienda Online</title>
+  <meta name="description" content="E-commerce sin backend — Tienda online de La Peruana" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <style>
-    :root {
-      --rojo-principal: #e54244;
-      --rojo-gradiente: #d73a45;
-      --blanco: #fff;
-      --amarillo: #ffe059;
-      --gris: #f9f9f9;
-      --verde-whatsapp: #25D366;
-    }
-    body {
-      margin: 0;
-      font-family: 'Roboto', Arial, sans-serif;
-      background: white;
-      min-height: 100vh;
-    }
-    header {
-      text-align: center;
-      padding: 2rem 1rem 1rem 1rem;
-      background: transparent;
-    }
-    .logo {
-      max-width: 420px;
-      width: 100%;
-      border-radius: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
-      margin-bottom: 0.7em;
-    }
-    .slogan {
-      color: var(--rojo-principal);
-      font-size: 1.2em;
-      margin-bottom: 0.5em;
-    }
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-    .seccion {
-      margin-bottom: 2.2em;
-    }
-    .seccion-titulo {
-      color: var(--white-principal);
-      font-family: 'Monserrat', sans-serif;
-      font-size: 2em;
-      margin: 1em 0 0.7em 0;
-      letter-spacing: 0.03em;
-      border-bottom: 2px solid var(--rojo-principal);
-      display: inline-block;
-      padding-bottom: 0.2em;
-      background: var(--blanco);
-    }
-    .productos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.3rem;
-    }
-    .producto {
-      background: var(--gris);
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1em;
-      transition: transform 0.18s;
-      position: relative;
-    }
-    .producto:hover {
-      transform: scale(1.04);
-    }
-    .producto-img {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 0.7em;
-      background: #eee;
-    }
-    .producto-nombre {
-      font-weight: 700;
-      font-size: 1.1em;
-      color: var(--black-principal);
-      margin-bottom: 0.3em;
-      text-align: center;
-    }
-    .producto-precio {
-      color: #333;
-      font-size: 1.1em;
-      margin-bottom: 0.6em;
-    }
-    .cantidad-ctrl {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.6em;
-      gap: 0.5em;
-    }
-    .btn-cantidad {
-      background: var(--rojo-principal);
-      color: var(--blanco);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      font-size: 1.2em;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-cantidad:active {
-      background: var(--rojo-gradiente);
-    }
-    .cantidad-num {
-      width: 32px;
-      text-align: center;
-      font-size: 1.1em;
-      font-weight: bold;
-      color: var(--rojo-principal);
-    }
-    .carrito-fab {
-      position: fixed;
-      top: 20px;
-      right: 24px;
-      background: var(--rojo-principal);
-      color: var(--blanco);
-      border: none;
-      border-radius: 50px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-      padding: 0.8em 1.4em;
-      font-size: 1.15em;
-      z-index: 99;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.6em;
-      font-weight: bold;
-    }
-    .carrito-fab svg {
-      width: 1.4em;
-      height: 1.4em;
-      vertical-align: middle;
-    }
-    .carrito-cantidad {
-      background: var(--amarillo);
-      color: #a60009;
-      border-radius: 50%;
-      font-weight: bold;
-      font-size: 0.97em;
-      min-width: 28px;
-      text-align: center;
-      padding: 0.1em 0.5em;
-      margin-left: 0.2em;
-    }
-    .modal-carrito-bg {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.35);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-carrito-bg.active { display: flex; }
-    .modal-carrito {
-      background: var(--blanco);
-      border-radius: 18px;
-      max-width: 420px;
-      width: 98vw;
-      padding: 2em 1.2em 1.2em 1.2em;
-      box-shadow: 0 6px 32px rgba(0,0,0,0.19);
-      position: relative;
-      animation: fadein .15s;
-    }
-    @keyframes fadein { from { opacity: 0; transform: scale(0.97);} to {opacity: 1; transform: scale(1);} }
-    .modal-carrito h2 {
-      margin-top: 0;
-      color: var(--rojo-principal);
-      text-align: center;
-    }
-    .modal-carrito .cerrar {
-      position: absolute;
-      top: 0.7em;
-      right: 1em;
-      background: transparent;
-      border: none;
-      font-size: 1.5em;
-      color: var(--rojo-gradiente);
-      cursor: pointer;
-    }
-    .carrito-items-list {
-      max-height: 250px;
-      overflow-y: auto;
-      margin-bottom: 1em;
-      margin-top: 1em;
-    }
-    .carrito-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.7em;
-      padding: 0.55em 0;
-      border-bottom: 1px solid #e5e5e5;
-      font-size: 1.04em;
-    }
-    .carrito-item-nombre {
-      flex: 1;
-    }
-    .carrito-item-cantidad {
-      min-width: 40px;
-      text-align: center;
-      font-weight: bold;
-      color: var(--rojo-principal);
-    }
-    .carrito-item-precio {
-      min-width: 65px;
-      text-align: right;
-      color: #333;
-    }
-    .carrito-total {
-      text-align: right;
-      font-size: 1.23em;
-      font-weight: bold;
-      margin-bottom: 1.2em;
-      color: var(--rojo-principal);
-    }
-    .btn-whatsapp {
-      display: block;
-      width: 100%;
-      background: var(--verde-whatsapp);
-      color: var(--blanco);
-      font-weight: bold;
-      border: none;
-      border-radius: 24px;
-      padding: 0.8em 0;
-      font-size: 1.1em;
-      text-decoration: none;
-      transition: background 0.2s;
-      cursor: pointer;
-      margin-top: .4em;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    .btn-whatsapp:hover { background: #1ebe57; }
-    .carrito-vacio {
-      text-align: center;
-      color: #888;
-      margin-top: 1.5em;
-      font-style: italic;
-    }
-    @media (max-width: 600px) {
-      main { padding: 1rem 0.3rem; }
-      .productos-grid { gap: 1rem; }
-      .modal-carrito { padding: 1.2em 0.5em 0.5em 0.5em; }
-      .seccion-titulo { font-size: 1.3em; }
-    }
-  </style>
+    :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e2e8f0; --primary:#22c55e; --primary-600:#16a34a; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:18px; }
+    [data-theme="light"]{ --bg:#f8fafc; --card:#ffffff; --muted:#64748b; --text:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.10); }
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);background:rgba(15,23,42,.75);border-bottom:1px solid rgba(148,163,184,.15)}
+    [data-theme="light"] header{background:rgba(255,255,255,.9)}
+    .h-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+    .brand i{color:var(--primary);font-size:28px}
+    .search{position:relative;flex:1;min-width:260px;max-width:520px}
+    .search input{width:100%;padding:12px 42px;border-radius:999px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
+    [data-theme="light"] .search input{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+    .toggle,.btn-lite{border:1px solid rgba(148,163,184,.25);padding:8px 10px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;background:#0b1220;color:var(--text)}
+    [data-theme="light"] .toggle,[data-theme="light"] .btn-lite{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .layout{max-width:1200px;margin:0 auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:16px}
+    @media(max-width:980px){ .layout{grid-template-columns:1fr} }
+    .side{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+    .cats button{width:100%;text-align:left;margin-bottom:6px;padding:10px;border-radius:12px;border:1px solid rgba(148,163,184,.2);background:#0b1220;color:var(--text);cursor:pointer}
+    [data-theme="light"] .cats button{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .cats button.active{border-color:var(--primary)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+    .toolbar select, .toolbar input{padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
+    [data-theme="light"] .toolbar select, [data-theme="light"] .toolbar input{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+    .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+    .thumb{height:90px;background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(6,182,212,.12));display:grid;place-items:center;color:#a7f3d0;font-size:32px}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .info{padding:12px;display:flex;flex-direction:column;gap:6px}
+    .name{font-weight:900;line-height:1.15} .unit{font-size:12px;color:var(--muted)} .price{font-weight:900}
+    .actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:auto}
+    .btn{border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text);border-radius:10px;padding:10px 12px;cursor:pointer}
+    [data-theme="light"] .btn{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .qty{display:flex;gap:6px;align-items:center}
+    .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#0b1220;color:var(--text)}
+    [data-theme="light"] .qty .icon{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .cartbar{position:sticky;bottom:0;background:rgba(15,23,42,.85);backdrop-filter:blur(8px);border-top:1px solid rgba(148,163,184,.2);padding:8px 16px;z-index:10}
+    [data-theme="light"] .cartbar{background:rgba(255,255,255,.95)}
+    .cartbar .inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .checkout{max-width:900px;margin:20px auto;background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px} @media(max-width:700px){ .row{grid-template-columns:1fr} }
+    .field, select{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
+    [data-theme="light"] .field, [data-theme="light"] select{background:#fff;border-color:#e2e8f0;color:#0f172a}
+    .summary{margin-top:12px;padding:12px;border-radius:10px;background:#0b1220;border:1px solid rgba(148,163,184,.2)}
+    [data-theme="light"] .summary{background:#f8fafc;border-color:#e2e8f0}
+    .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(148,163,184,.2)}
+    .toast{position:fixed;right:12px;bottom:12px;background:#052e16;color:#bbf7d0;border:1px solid #166534;padding:10px 12px;border-radius:10px;display:none;z-index:1000}
+    .toast.show{display:block}
+
+    /* ==== Light theme readability hardening ==== */
+    [data-theme="light"] .card { background:#ffffff; border-color:#e2e8f0; }
+    [data-theme="light"] .thumb { background:#f1f5f9; }
+    [data-theme="light"] .info { color:#0f172a; }
+    [data-theme="light"] .info .name { color:#0f172a; font-weight:900; }
+    [data-theme="light"] .info .unit { color:#475569; }
+    [data-theme="light"] .info .price { color:#0f172a; font-weight:900; }
+    [data-theme="light"] .qty .icon { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
+    [data-theme="light"] .field { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
+    [data-theme="light"] .btn { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
+    [data-theme="light"] .cartbar { background:rgba(255,255,255,.97); }
+
+  
+/* === FORCE LIGHT THEME READABILITY OVERRIDES === */
+[data-theme="light"] .card { background:#ffffff !important; border-color:#e2e8f0 !important; }
+[data-theme="light"] .thumb { background:#f1f5f9 !important; }
+[data-theme="light"] .info { color:#0f172a !important; }
+[data-theme="light"] .info .name { color:#0f172a !important; font-weight:900 !important; }
+[data-theme="light"] .info .unit { color:#475569 !important; }
+[data-theme="light"] .info .price { color:#0f172a !important; font-weight:900 !important; }
+[data-theme="light"] .qty .icon { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
+[data-theme="light"] .field, 
+[data-theme="light"] select { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
+[data-theme="light"] .btn { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
+[data-theme="light"] .cartbar { background:rgba(255,255,255,.97) !important; }
+
+
+/* === ULTIMATE LIGHT THEME TEXT OVERRIDE === */
+[data-theme="light"] .card, 
+[data-theme="light"] .card * {
+  color: #0f172a !important; /* force dark text across the card */
+}
+/* Then, soften secondary text */
+[data-theme="light"] .card .unit {
+  color: #475569 !important;
+}
+/* Price stays dark and bold */
+[data-theme="light"] .card .price {
+  color: #0f172a !important;
+  font-weight: 900 !important;
+}
+
+
+/* === Chrome-proof light theme text + placeholders === */
+[data-theme="light"] body,
+[data-theme="light"] .side,
+[data-theme="light"] .toolbar,
+[data-theme="light"] .cats button,
+[data-theme="light"] .search input,
+[data-theme="light"] .field,
+[data-theme="light"] select,
+[data-theme="light"] .btn,
+[data-theme="light"] .cartbar,
+[data-theme="light"] .checkout,
+[data-theme="light"] .line {
+  color: #0f172a !important;
+}
+
+/* Placeholder text in inputs */
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+/* Force name/unit/price again (belt & suspenders) */
+[data-theme="light"] .info,
+[data-theme="light"] .info .name,
+[data-theme="light"] .info .price { color:#0f172a !important; }
+[data-theme="light"] .info .unit { color:#475569 !important; }
+
+/* Fix icon buttons contrast */
+[data-theme="light"] .qty .icon i,
+[data-theme="light"] .cats button i { color:#0f172a !important; }
+
+/* Ensure links and strong text are dark */
+[data-theme="light"] a, 
+[data-theme="light"] strong { color:#0f172a !important; }
+
+</style>
 </head>
 <body>
   <header>
-    <img src="https://raw.githubusercontent.com/la-peruana/laperuana/main/logo-la-peruana.jpg" alt="Logo La Peruana" class="logo">
-    </header>
-  <main id="main"></main>
-  <button class="carrito-fab" id="abrirCarritoBtn" title="Ver carrito">
-    <svg fill="none" viewBox="0 0 24 24"><path fill="#fff" d="M7 20a2 2 0 11.001-3.999A2 2 0 017 20zm10 0a2 2 0 11.001-3.999A2 2 0 0117 20zM7.16 17h9.69c.87 0 1.64-.56 1.89-1.38l2.22-7.06A1 1 0 0020 7H6.21l-.94-2.36A1 1 0 004.34 4H2a1 1 0 100 2h1.34l3.6 9.36-1.35 2.44A1 1 0 006 19h13a1 1 0 100-2H7.42l.74-1.35z"/></svg>
-    <span>Carrito</span>
-    <span class="carrito-cantidad" id="carritoCantidad">0</span>
-  </button>
-  <div class="modal-carrito-bg" id="modalCarritoBg">
-    <div class="modal-carrito">
-      <button class="cerrar" id="cerrarCarritoBtn" title="Cerrar">&times;</button>
-      <h2>Tu Carrito</h2>
-      <div class="carrito-items-list" id="carritoLista"></div>
-      <div class="carrito-total" id="carritoTotal"></div>
-      <a class="btn-whatsapp" id="carritoWhatsApp" target="_blank">Enviar pedido por WhatsApp</a>
+    <div class="h-in">
+      <div class="brand" style="display:flex;align-items:center;gap:10px">
+        <i class="fa-solid fa-store"></i>
+        <div>
+          <div style="font-weight:900;letter-spacing:.3px">La Peruana — Tienda Online</div>
+          <div style="font-size:12px;color:var(--muted)">Catálogo embebido + Google Sheets (opcional)</div>
+        </div>
+      </div>
+      <div class="search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="q" placeholder="Buscar (ej: medialuna, sandwich, queso…)">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center"><button class="btn-lite" id="btnConnectSheets"><i class="fa-solid fa-plug"></i> Conectar Sheets</button>
+        <button class="btn-lite" id="btnSync"><i class="fa-solid fa-rotate"></i> Actualizar catálogo</button>
+        <div class="toggle" id="themeToggle" title="Cambiar tema"><i class="fa-solid fa-moon"></i> <span id="themeLabel">Oscuro</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="side">
+      <h3>Categorías</h3>
+      <div id="cats" class="cats"></div>
+      <hr style="border-color:rgba(148,163,184,.2)">
+      <h3>Filtros</h3>
+      <div class="toolbar">
+        <select id="sort">
+          <option value="relevance">Ordenar: Relevancia</option>
+          <option value="price_asc">Precio ↑</option>
+          <option value="price_desc">Precio ↓</option>
+          <option value="alpha">A–Z</option>
+        </select>
+        <input id="minp" class="field" placeholder="Precio min">
+        <input id="maxp" class="field" placeholder="Precio max">
+        <button class="btn" id="apply">Aplicar</button>
+        <button class="btn" id="clear">Limpiar</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+
+  <div class="cartbar">
+    <div class="inner">
+      <div><strong id="cartCount">0 ítems</strong></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <strong id="cartTotal">$0</strong>
+        <button class="btn" id="btnClearCartBar">Limpiar carrito</button>
+        <a href="#checkout" class="btn primary">Ir al checkout</a>
+      </div>
     </div>
   </div>
+
+  <section id="checkout" class="checkout">
+    <h2>Checkout</h2>
+    <div class="row">
+      <div>
+        <label>Nombre y apellido</label>
+        <input id="f_name" class="field" autocomplete="name">
+      </div>
+      <div>
+        <label>Email</label>
+        <input id="f_email" class="field" autocomplete="email">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Teléfono</label>
+        <input id="f_phone" class="field" autocomplete="tel">
+      </div>
+      <div>
+        <label>Modo de entrega</label>
+        <select id="f_mode">
+          <option value="delivery">Delivery</option>
+          <option value="pickup">Retiro en local</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" id="rowAddress">
+      <div>
+        <label>Dirección</label>
+        <input id="f_address" class="field" placeholder="Calle, número, depto, referencias">
+      </div>
+      <div>
+        <label>Zona</label>
+        <select id="f_zone" class="field">
+          <option value="">Seleccionar</option>
+          <option value="centro">Centro — $1500</option>
+          <option value="parana-este">Paraná Este — $2200</option>
+          <option value="area-metropolitana">Área Metropolitana — $3000</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Pago</label>
+        <select id="f_payment" class="field">
+          <option value="efectivo">Efectivo (5% off)</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="mercadopago">Mercado Pago</option>
+        </select>
+      </div>
+      <div>
+        <label>Cupón</label>
+        <input id="f_coupon" class="field" placeholder="BIENVENIDO10">
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="line"><span>Subtotal</span><strong id="sum_sub">$0</strong></div>
+      <div class="line"><span>Envío</span><strong id="sum_ship">$0</strong></div>
+      <div class="line"><span>Descuentos</span><strong id="sum_disc">-$0</strong></div>
+      <div class="line" style="border-bottom:0"><span>Total</span><strong id="sum_total">$0</strong></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn" id="btnClearCart">Limpiar carrito</button>
+      <button class="btn primary" id="btnConfirm">Confirmar pedido</button>
+    </div>
+
+    <p id="payHints" style="color:var(--muted);font-size:12px;margin-top:8px"></p>
+    <div id="orderOk" style="display:none;margin-top:12px" class="summary">✅ Pedido confirmado. Abrimos WhatsApp con tu orden.</div>
+  </section>
+
+  <div class="toast" id="toast">Agregado al carrito</div>
+
   <script>
-    // Cambia este número por tu WhatsApp (sin + y sin espacios, ej: 5493436123456)
-    const WHATSAPP_NUMERO = "5493435075991";
+    // === CONFIG ===
+    const WHATSAPP_NUMBER = "+5493435075991"; // recepción
+    // Pega aquí tu GVIZ o pásalo por ?sheets=URL. Si se deja vacío, NO intenta cargar.
+    let SHEETS_GVIZ_URL = localStorage.getItem("sheets_gviz_url") || "";
 
-    // Estructura con 11 secciones y productos ejemplo para cada una (agrega hasta 100 productos)
-    const secciones = [
-      { nombre: "LACTEOS", productos: [
-        { nombre: "Leche Entera 1L", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Queso Cremoso 300g", precio: 1400, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Yogur Bebible 1L", precio: 1450, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Manteca 200g", precio: 850, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Queso Rallado 100g", precio: 700, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "ALMACEN", productos: [
-        { nombre: "Arroz Largo Fino 1Kg", precio: 800, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Fideos Spaghetti 500g", precio: 600, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Harina 000 1Kg", precio: 700, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Azúcar 1Kg", precio: 950, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Sal Fina 500g", precio: 250, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "BEBIDAS", productos: [
-        { nombre: "Gaseosa Cola 2.25L", precio: 2000, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Agua Mineral 2L", precio: 900, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Jugo en Polvo", precio: 250, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Cerveza 1L", precio: 1300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Vino Tinto 750ml", precio: 2600, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "CARNICERIA", productos: [
-        { nombre: "Carne Picada 1Kg", precio: 4500, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Pollo Entero", precio: 3200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Asado 1Kg", precio: 6300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Milanesa de Carne 1Kg", precio: 5200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Chorizo 1Kg", precio: 3400, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "VERDULERIA", productos: [
-        { nombre: "Papas 1Kg", precio: 650, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Cebolla 1Kg", precio: 700, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Tomate 1Kg", precio: 1100, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Zanahoria 1Kg", precio: 690, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Bananas 1Kg", precio: 1100, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "LIMPIEZA", productos: [
-        { nombre: "Lavandina 1L", precio: 350, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Jabón en Polvo 800g", precio: 1100, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Detergente 500ml", precio: 480, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Esponja x3", precio: 350, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Desodorante de Piso", precio: 1200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "HIGIENE PERSONAL", productos: [
-        { nombre: "Shampoo 400ml", precio: 1100, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Jabón de Tocador x3", precio: 900, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Papel Higiénico x4", precio: 950, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Dentífrico 90g", precio: 780, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Toalla Femenina x8", precio: 850, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "FIAMBRERIA", productos: [
-        { nombre: "Jamón Cocido 200g", precio: 1300, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Queso Port Salut 300g", precio: 1600, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Mortadela 200g", precio: 750, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Salame 200g", precio: 1600, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Queso de Máquina 200g", precio: 1400, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "PANADERIA", productos: [
-        { nombre: "Pan Francés 1Kg", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Pan de Molde", precio: 900, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Bizcochos Salados", precio: 700, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Tostadas Integrales", precio: 800, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Pan Casero", precio: 950, imagen: "fotos/pan_casero.jpg" }
-      ]},
-      { nombre: "PASTELERIA", productos: [
-        { nombre: "Alfajores x6", precio: 1320, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Torta de Chocolate", precio: 2500, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Facturas x6", precio: 1800, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Chocotorta", precio: 2200, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Galletitas de Manteca", precio: 850, imagen: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=cover&w=400&q=80" }
-      ]},
-      { nombre: "ROTISERIA", productos: [
-        { nombre: "Empanadas Docena", precio: 3000, imagen: "fotos/empanadas.jpg" },
-        { nombre: "Tarta de Pollo", precio: 1400, imagen: "fotos/tarta_pollo.jpg" },
-        { nombre: "Milanesas de Pollo x6", precio: 2500, imagen: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Tortilla de Papas", precio: 1200, imagen: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=cover&w=400&q=80" },
-        { nombre: "Pizza", precio: 2300, imagen: "https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=cover&w=400&q=80" }
-      ]}
-    ];
+    const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%230b1220'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='28' font-family='Arial'>Imagen no disponible</text></svg>";
 
-    // Carrito: { [seccionIdx_productoIdx]: cantidad }
-    let carrito = {};
+    const CURRENCY = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS", maximumFractionDigits:0});
+    const fmt = n => CURRENCY.format(n);
+    const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
 
-    // Renderizado de secciones y productos
-    function renderSecciones() {
-      const main = document.getElementById('main');
-      main.innerHTML = '';
-      secciones.forEach((seccion, sidx) => {
-        const divSec = document.createElement('section');
-        divSec.className = 'seccion';
-        divSec.innerHTML = `<h2 class="seccion-titulo">${seccion.nombre}</h2>`;
-        const grid = document.createElement('div');
-        grid.className = 'productos-grid';
+    const Categories = [
+  { id:"rotiseria", name:"Rotisería", icon:"fa-utensils" },
+  { id:"panaderia", name:"Panadería", icon:"fa-bread-slice" },
+  { id:"pasteleria", name:"Pastelería", icon:"fa-cake-candles" },
+  { id:"carniceria", name:"Carnicería", icon:"fa-drumstick-bite" },
+  { id:"verduleria", name:"Verdulería", icon:"fa-carrot" },
+  { id:"fiambreria", name:"Fiambrería", icon:"fa-cheese" },
+  { id:"almacen", name:"Almacén", icon:"fa-boxes-stacked" },
+  { id:"bebidas", name:"Bebidas", icon:"fa-champagne-glasses" },
+  { id:"cafeteria", name:"Cafetería", icon:"fa-mug-saucer" }
+];
+    let Catalog = {
+      rotiseria:[
+        { name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" },
+        { name:"Torrejas de acelga", price:1225, unit:"x 3 unidades" },
+        { name:"Sándwich Simples", price:12846, unit:"bandeja x 6 un." },
+        { name:"Sándwich Triples", price:13588, unit:"bandeja x 6 un." },
+        { name:"Tortilla de papas", price:4782, unit:"porción" },
+        { name:"Tortilla de acelga", price:4863, unit:"porción" },
+        { name:"Terrina", price:3633, unit:"porción" },
+        { name:"Papas fritas", price:2591, unit:"porción" },
+        { name:"Hamburguesa Cheddar c- papas", price:8298, unit:"unidad" },
+        { name:"Hamburguesa LP c- papas", price:7447, unit:"unidad" },
+        { name:"Patamuslo", price:13196, unit:"unidad" },
+        { name:"Sándwich milanesa de pollo", price:5637, unit:"unidad" },
+        { name:"Sándwich milanesa de carne", price:8176, unit:"unidad" },
+        { name:"Sándwich milanesa de carne completo", price:9638, unit:"unidad" },
+        { name:"Pebete de jamón y queso", price:4782, unit:"unidad" },
+        { name:"Empanadas de choclo", price:6168, unit:"x 3 un." },
+        { name:"Empanadas de jamón y queso", price:4875, unit:"x 3 un." },
+        { name:"Empanadas Calabresa", price:4190, unit:"unidad" },
+        { name:"Empanadas de carne dulce", price:5551, unit:"x 3 un." },
+        { name:"Empanadas de verdura", price:4278, unit:"x 3 un." },
+        { name:"Empanadas de carne saladas", price:4923, unit:"x 3 un." },
+        { name:"Empanadas de pollo", price:4713, unit:"x 3 un." },
+        { name:"Milanesas de carne", price:11258, unit:"unidad" },
+        { name:"Milanesas de pollo", price:8344, unit:"unidad" }
+      ],
+      panaderia:[
+        { name:"Facturas con crema", price:2177, unit:"x 3 un." },
+        { name:"Facturas con crema y membrillo", price:2613, unit:"x 3 un." },
+        { name:"Facturas con crema y dulce de leche", price:1960, unit:"x 3 un." },
+        { name:"Medialunas con dulce de leche", price:0, unit:"x 3 un." },
+        { name:"Medialunas dulces", price:0, unit:"x 3 unidades" },
+        { name:"Vigilantes de batata", price:2504, unit:"x 3 un." },
+        { name:"Vigilantes de membrillo", price:2308, unit:"x 3 un." },
+        { name:"Bollitos con crema", price:2068, unit:"x 3 un." },
+        { name:"Bollitos con dulce de leche", price:1960, unit:"x 3 un." },
+        { name:"Empanaditas de dulce de leche", price:1415, unit:"x 3 un." },
+        { name:"Pirulines", price:2177, unit:"x 3 un." },
+        { name:"Borrachitos", price:1960, unit:"x 3 un." },
+        { name:"Medialunas Marplatenses", price:1933, unit:"x 3 unidades" },
+        { name:"Especiales", price:2363, unit:"250 grs" },
+        { name:"Pan Francés", price:740, unit:"250 grs" },
+        { name:"Pan Rondín", price:715, unit:"250 grs" },
+        { name:"Galleta de campo", price:840, unit:"250 grs" },
+        { name:"Galleta hojaldrada", price:1018, unit:"250 grs" },
+        { name:"Suizos", price:3319, unit:"unidad" },
+        { name:"Medialunas saladas grandes", price:3281, unit:"250 grs" },
+        { name:"Medialunas saladas chicas", price:4024, unit:"250 grs" },
+        { name:"Croissant", price:2464, unit:"unidad" }
+      ],
+      pasteleria:[
+        { name:"Cheese cake individual", price:6362, unit:"unidad" },
+        { name:"Mini bombón", price:1019, unit:"unidad" },
+        { name:"Mini lemon pie", price:1019, unit:"unidad" },
+        { name:"Mini frutal", price:1551, unit:"unidad" },
+        { name:"Lingote de durazno", price:2038, unit:"unidad" },
+        { name:"Lingote de frutilla", price:2038, unit:"unidad" },
+        { name:"Red Velvet", price:1699, unit:"unidad" },
+        { name:"Tiramisú", price:3057, unit:"unidad" },
+        { name:"Masas finas", price:7427, unit:"x 7 un." },
+        { name:"Alfajores de maicena grandes", price:1362, unit:"x 2 un." },
+        { name:"Alfajores de maicena medianos", price:1424, unit:"x 3 un." },
+        { name:"Alfajores de maicena mini", price:1485, unit:"x 5 un." },
+        { name:"Alfajores de chocolate grandes", price:1820, unit:"x 2 un." },
+        { name:"Alfajores de chocolate medianos", price:1903, unit:"x 3 un." },
+        { name:"Alfajores de chocolate mini", price:1986, unit:"x 5 un." }
+      ],
+      carniceria:[
+        { name:"Milanesa de carne", price:13500, unit:"kg" },
+        { name:"Milanesa de pollo", price:12000, unit:"kg" },
+        { name:"Filet de pechuga", price:15500, unit:"kg" },
+        { name:"Costeletas cerdo", price:8400, unit:"kg" },
+        { name:"Hamburguesas carne común", price:8990, unit:"kg" },
+        { name:"Hamburguesas carne especial", price:17236, unit:"kg" },
+        { name:"Carne picada común", price:8990, unit:"kg" },
+        { name:"Carne picada especial", price:14260, unit:"kg" }
+      ],
+      verduleria:[
+        { name:"Zanahorias", price:984, unit:"kg" },
+        { name:"Tomates-redondos", price:5496, unit:"kg" },
+        { name:"Manzanas rojas", price:7458, unit:"kg" },
+        { name:"Bananas", price:4101, unit:"kg" }
+      ],
+      fiambreria:[
+        { name:"Bandeja Picada de fiambres surtidos LP x 800 grs (queso barra, bondiola, lomito, mortadela, jamón cocido, salame baston, pickles y aceitunas)", price:19600, unit:"bandeja" },
+        { name:"Bandeja picada de quesos surtidos LP x 500 grs", price:7435, unit:"bandeja" },
+        { name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" },
+        { name:"Bandeja Picada Paladini x 700 grs", price:15681, unit:"bandeja" },
+        { name:"Queso cremoso María Luisa x 500 grs", price:3955, unit:"bandeja" },
+        { name:"Queso barra María Luisa x 500 grs", price:4984, unit:"bandeja" },
+        { name:"Jamón cocido Lario feteado x 500 grs", price:11318, unit:"bandeja" },
+        { name:"Mortadela Paladini x 300 grs", price:5153, unit:"bandeja" }
+      ],
+      almacen:[
+        { name:"Paté de foie Molto", price:957, unit:"unidad" },
+        { name:"Puré de tomate Arcor", price:928, unit:"unidad" },
+        { name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" },
+        { name:"Fideos tallarín Matarazo", price:1855, unit:"unidad" },
+        { name:"Galletitas surtido Bagley", price:3560, unit:"unidad" },
+        { name:"Yerba Sinceridad", price:3931, unit:"x 1 kg" },
+        { name:"Aceite Natura", price:3978, unit:"900 ml" },
+        { name:"Azucar Ledesma", price:1648, unit:"x 1 kg" },
+        { name:"Celusal fina", price:1368, unit:"500 grs." },
+        { name:"Jabón liquido p-diluir ALA ropa", price:1540, unit:"150 ml." },
+        { name:"Suavizante Vivere clasico", price:3156, unit:"900 ml" },
+        { name:"Papel higienico Felpita", price:1820, unit:"4 x 30" }
+      ],
+      bebidas:[
+        { name:"Coca Cola 1.5L", price:3810, unit:"botella" },
+        { name:"Coca Cola 2.5L", price:4999, unit:"botella" },
+        { name:"Agua saborizadas Levité x 1.5L", price:1460, unit:"botella" },
+        { name:"Pritty Limón 2.25L", price:1910, unit:"botella" },
+        { name:"Pepsi 3L", price:2987, unit:"botella" },
+        { name:"Vino Otro Loco Más", price:4736, unit:"botella" },
+        { name:"Vino Finjamos Demencia", price:4784, unit:"botella" },
+        { name:"Vino Hormiga Negra", price:3394, unit:"botella" },
+        { name:"Cerveza Corona 330CC", price:3230, unit:"botella" },
+        { name:"Cerveza en lata Quilmes 473cc", price:1258, unit:"lata" },
+        { name:"Cerveza en lata Budweiser 473cc", price:1545, unit:"lata" }
+      ],
+      cafeteria:[
+        { name:"Café con leche grande + 2 medialunas marplatenses", price:4500, unit:"Combo" },
+        { name:"Café con leche grande + 2 medialunas saladas", price:3964, unit:"Combo" },
+        { name:"Café con leche grande + 2 alfajores de maicena", price:4473, unit:"Combo" },
+        { name:"Café con leche grande + Croissant", price:4473, unit:"Combo" },
+        { name:"Café con leche grande + 2 facturas", price:4500, unit:"Combo" },
+        { name:"Café con leche grande + 2 alfajores de chocolate", price:4473, unit:"Combo" }
+      ]
+    }; // fallback embebido
 
-        seccion.productos.forEach((prod, pidx) => {
-          const key = `${sidx}_${pidx}`;
-          const card = document.createElement('div');
-          card.className = 'producto';
-          card.innerHTML = `
-            <img class="producto-img" src="${prod.imagen}" alt="${prod.nombre}">
-            <div class="producto-nombre">${prod.nombre}</div>
-            <div class="producto-precio">$${prod.precio.toLocaleString('es-AR')}</div>
-            <div class="cantidad-ctrl">
-              <button class="btn-cantidad" data-key="${key}" data-action="restar">-</button>
-              <span class="cantidad-num" id="cantidad-${key}">${carrito[key]||0}</span>
-              <button class="btn-cantidad" data-key="${key}" data-action="sumar">+</button>
-            </div>
-          `;
-          grid.appendChild(card);
-        });
-        divSec.appendChild(grid);
-        main.appendChild(divSec);
-      });
-    }
+    const State = { theme: localStorage.getItem("shop_theme") || "dark", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
 
-    // Manejo de sumar/restar
-    document.addEventListener('click', e => {
-      if(e.target.classList.contains('btn-cantidad')) {
-        const key = e.target.dataset.key;
-        if(!(key in carrito)) carrito[key]=0;
-        if(e.target.dataset.action === 'sumar') carrito[key]++;
-        if(e.target.dataset.action === 'restar' && carrito[key]>0) carrito[key]--;
-        if(carrito[key]===0) delete carrito[key];
-        document.getElementById(`cantidad-${key}`).textContent = carrito[key]||0;
-        actualizarFab();
-      }
-    });
+    const Cart = {
+      key:"shop_cart_v1",
+      data: {},
+      load(){ try{ this.data = JSON.parse(localStorage.getItem(this.key)) || {} }catch{ this.data = {} }; UI.sync() },
+      save(){ localStorage.setItem(this.key, JSON.stringify(this.data)); UI.sync() },
+      add(p){ const id=slug(p.name); if(!this.data[id]) this.data[id]={...p, qty:0}; this.data[id].qty++; this.save(); toast("Agregado") },
+      dec(id){ if(!this.data[id]) return; this.data[id].qty--; if(this.data[id].qty<=0) delete this.data[id]; this.save() },
+      set(id,q){ if(q<=0) delete this.data[id]; else if(this.data[id]) this.data[id].qty=q; this.save() },
+      clear(){ this.data={}; this.save() },
+      items(){ return Object.values(this.data) },
+      count(){ return this.items().reduce((a,b)=>a+b.qty,0) },
+      subtotal(){ return this.items().reduce((a,b)=>a+b.price*b.qty,0) }
+    };
 
-    // Carrito FAB y Modal
-    function actualizarFab() {
-      const total = Object.values(carrito).reduce((a,b)=>a+b,0);
-      document.getElementById('carritoCantidad').textContent = total;
-    }
+    const toast = (msg) => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1500) };
+    const Zones = { centro:1500, "parana-este":2200, "area-metropolitana":3000 };
 
-    function renderCarrito() {
-      const lista = document.getElementById('carritoLista');
-      lista.innerHTML = '';
-      let total = 0;
-      Object.keys(carrito).forEach(key => {
-        const [sidx, pidx] = key.split('_').map(Number);
-        const p = secciones[sidx].productos[pidx];
-        const cant = carrito[key];
-        if (cant > 0) {
-          const subtotal = cant * p.precio;
-          total += subtotal;
-          const div = document.createElement('div');
-          div.className = 'carrito-item';
-          div.innerHTML = `
-            <span class="carrito-item-nombre">${p.nombre}</span>
-            <span class="carrito-item-cantidad">${cant}</span>
-            <span class="carrito-item-precio">$${subtotal.toLocaleString('es-AR')}</span>
-          `;
-          lista.appendChild(div);
+    const Data = {
+      overrideFromQuery(){
+        try{ const u=new URL(location.href); const s=u.searchParams.get("sheets"); if(s) SHEETS_GVIZ_URL=s; }catch{}
+      },
+      async loadFromSheets() {
+        if(!SHEETS_GVIZ_URL) return; // no tocar catálogo si no hay URL
+        try{
+          const res = await fetch(SHEETS_GVIZ_URL, { cache:"no-store" });
+          const text = await res.text();
+          const json = JSON.parse(text.replace(/^.*setResponse\(/, "").replace(/\);?\s*$/, ""));
+          const rows = json.table.rows || [];
+          const tmp = {}; for(const c of Categories) tmp[c.id]=[];
+          for(const r of rows){
+            const c = r.c || [];
+            const category = (c[0]?.v||"").toString().trim();
+            const name = (c[1]?.v||"").toString().trim();
+            const price = parseInt((c[2]?.v||0), 10) || 0;
+            const unit  = (c[3]?.v||"").toString().trim();
+            const combo = String(c[4]?.v).toLowerCase()==="true";
+            const image = (c[5]?.v||"").toString().trim();
+            const stock = parseInt((c[6]?.v||999), 10) || 999;
+            const n = category.toLowerCase();
+            let id="almacen";
+            if(n.includes("cafeter")) id="cafeteria";
+            else if(n.includes("rotis")) id="rotiseria";
+            else if(n.includes("panad")) id="panaderia";
+            else if(n.includes("pastel")) id="pasteleria";
+            else if(n.includes("carnic")) id="carniceria";
+            else if(n.includes("verdul")) id="verduleria";
+            else if(n.includes("fiambr")||n.includes("queso")||n.includes("charcut")) id="fiambreria";
+            else if(n.includes("bebid")||n.includes("cerve")||n.includes("gaseosa")) id="bebidas";
+            const item={name,price,unit}; if(combo) item.combo=true; if(image) item.image=image; item.stock=stock;
+            tmp[id].push(item);
+          }
+          let imported = 0; for(const k in tmp) imported += tmp[k].length;
+          if(imported>0) { Catalog = tmp; UI.grid(); toast("Catálogo actualizado ("+imported+" ítems)"); }
+          else { toast("Sheet vacío: mantengo catálogo local"); }
+        }catch(e){
+          console.error(e); toast("No se pudo cargar el Sheet: mantengo catálogo local");
         }
-      });
-      if (total === 0) {
-        lista.innerHTML = '<div class="carrito-vacio">¡El carrito está vacío!</div>';
       }
-      document.getElementById('carritoTotal').textContent = total > 0 ? `Total: $${total.toLocaleString('es-AR')}` : '';
-      document.getElementById('carritoWhatsApp').style.display = total>0 ? 'block' : 'none';
-      document.getElementById('carritoWhatsApp').href = generarLinkWhatsApp();
-    }
-
-   function generarLinkWhatsApp() {
-  let mensaje = "¡Hola! Quiero hacer el siguiente pedido:\n";
-  let total = 0;
-
-  Object.keys(carrito).forEach(key => {
-    const [sidx, pidx] = key.split('_').map(Number);
-    const p = secciones[sidx].productos[pidx];
-    const cant = carrito[key];
-    if (cant > 0) {
-      mensaje += `- ${p.nombre} x${cant} = $${(cant * p.precio).toLocaleString('es-AR')}\n`;
-      total += cant * p.precio;
-    }
-  });
-
-  mensaje += `Total: $${total.toLocaleString('es-AR')}`;
-
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-  // Usa wa.me en celulares y web.whatsapp.com en PC
-  return isMobile
-    ? `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`
-    : `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMERO}&text=${encodeURIComponent(mensaje)}`;
-}
-
-    // Modal mostrar/ocultar
-    document.getElementById('abrirCarritoBtn').onclick = ()=>{
-      renderCarrito();
-      document.getElementById('modalCarritoBg').classList.add('active');
-    };
-    document.getElementById('cerrarCarritoBtn').onclick = ()=>{
-      document.getElementById('modalCarritoBg').classList.remove('active');
-    };
-    document.getElementById('modalCarritoBg').onclick = function(e){
-      if (e.target === this) this.classList.remove('active');
     };
 
-    renderSecciones();
-    actualizarFab();
+    const UI = {
+      init(){
+        document.documentElement.setAttribute("data-theme", State.theme);
+        document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro";
+        Data.overrideFromQuery();
+        this.cats(); this.grid(); this.bind(); Cart.load(); this.checkoutSync();
+        const initial = Object.values(Catalog).reduce((a,b)=>a+(b?.length||0),0); toast("Catálogo: "+initial+" ítems");
+        Data.loadFromSheets();
+      },
+      bind(){
+        document.getElementById("themeToggle").onclick = ()=>{ State.theme = State.theme==="dark" ? "light":"dark"; localStorage.setItem("shop_theme", State.theme); document.documentElement.setAttribute("data-theme", State.theme); document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro"; };
+        document.getElementById("q").oninput = e => { State.q = e.target.value.toLowerCase(); this.grid(); };
+        document.getElementById("sort").onchange = e => { State.sort = e.target.value; this.grid(); };
+        document.getElementById("apply").onclick = ()=>{ State.minp = document.getElementById("minp").value; State.maxp = document.getElementById("maxp").value; this.grid(); };
+        document.getElementById("clear").onclick = ()=>{ State.minp=""; State.maxp=""; document.getElementById("minp").value=""; document.getElementById("maxp").value=""; this.grid(); };
+        document.getElementById("f_mode").onchange = ()=> this.checkoutSync();
+        document.getElementById("f_zone").onchange = ()=> this.checkoutSync();
+        document.getElementById("f_payment").onchange = ()=> this.checkoutSync();
+        document.getElementById("f_coupon").oninput = ()=> this.checkoutSync();
+                        document.getElementById("btnConfirm").onclick = ()=> this.confirmOrder();
+        document.getElementById("btnClearCartBar").onclick = ()=>{ if(confirm("¿Vaciar todo el carrito?")){ Cart.clear(); toast("Carrito vacío"); } };
+        document.getElementById("btnSync").onclick = ()=> Data.loadFromSheets();
+
+        document.getElementById("btnConnectSheets").onclick = ()=>{
+          const current = localStorage.getItem("sheets_gviz_url") || "";
+          const val = prompt("Pegá aquí el enlace GVIZ de tu Google Sheets (formato: https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:json&sheet=catalog)", current);
+          if(val && val.startsWith("https://")){
+            localStorage.setItem("sheets_gviz_url", val);
+            SHEETS_GVIZ_URL = val;
+            toast("Sheets conectado. Actualizando catálogo…");
+            Data.loadFromSheets();
+          } else if(val !== null) {
+            toast("Enlace inválido. No se guardó.");
+          }
+        };
+        // Si no hay URL configurada, ofrecer conectarla al iniciar
+        if(!SHEETS_GVIZ_URL){
+          setTimeout(()=>{
+            document.getElementById("btnConnectSheets").click();
+          }, 600);
+        }
+
+      },
+      cats(){
+        const el = document.getElementById("cats"); el.innerHTML="";
+        Categories.forEach(c=>{ const b=document.createElement("button"); b.className=""+(State.cat===c.id?"active":""); b.innerHTML=`<i class="fa-solid ${c.icon}"></i> ${c.name}`; b.onclick=()=>{ State.cat=c.id; this.cats(); this.grid(); }; el.appendChild(b); });
+      },
+      productsOf(c){ return Catalog[c.id]||[] },
+      grid(){
+        const wrap = document.getElementById("grid"); wrap.innerHTML="";
+        const cats = State.q ? Categories : Categories.filter(c=>c.id===State.cat);
+        cats.forEach(c=>{
+          const list = this.productsOf(c)
+            .filter(p=> !State.q || p.name.toLowerCase().includes(State.q))
+            .filter(p=> (State.minp? p.price>=parseInt(State.minp,10):true) && (State.maxp? p.price<=parseInt(State.maxp,10):true))
+            .slice();
+
+          if(State.sort==="price_asc") list.sort((a,b)=>a.price-b.price);
+          else if(State.sort==="price_desc") list.sort((a,b)=>b.price-a.price);
+          else if(State.sort==="alpha") list.sort((a,b)=> a.name.localeCompare(b.name,'es'));
+
+          list.forEach(p=>{
+            const key = slug(p.name);
+            const card = document.createElement("div"); card.className="card";
+            const th = document.createElement("div"); th.className="thumb";
+            if(p.image){ const img=document.createElement("img"); img.alt=p.name; img.src=p.image; img.onerror = ()=> { img.src = PLACEHOLDER_IMG }; th.appendChild(img); }
+            else{ const img=document.createElement("img"); img.alt=p.name; img.src=PLACEHOLDER_IMG; th.appendChild(img); }
+            card.appendChild(th);
+            const info = document.createElement("div"); info.className="info";
+            info.innerHTML = `<div class="name">${p.name}</div><div class="unit">${p.unit}</div><div class="price">${fmt(p.price)}</div>`;
+            const acts = document.createElement("div"); acts.className="actions";
+            acts.innerHTML = `<div class="qty">
+                <div class="icon" data-act="dec" data-key="${key}"><i class="fa-solid fa-minus"></i></div>
+                <input class="field" style="width:60px;text-align:center" value="${Cart.data[key]?.qty||0}" data-act="set" data-key="${key}"/>
+                <div class="icon" data-act="inc" data-key="${key}"><i class="fa-solid fa-plus"></i></div>
+              </div>`;
+            acts.querySelector('[data-act="inc"]').onclick = () => Cart.add(p);
+            acts.querySelector('[data-act="dec"]').onclick = () => Cart.dec(key);
+            acts.querySelector('[data-act="set"]').onchange = (e)=>{ const q=Math.max(0,parseInt(e.target.value||"0",10)); if(!Cart.data[key] && q>0) Cart.data[key]={...p,qty:0}; Cart.set(key,q); };
+            info.appendChild(acts); card.appendChild(info); wrap.appendChild(card);
+          });
+        });
+        this.sync();
+      },
+      sync(){
+        const count = Cart.count(); document.getElementById("cartCount").textContent = `${count} ${count===1?'ítem':'ítems'}`;
+        document.getElementById("cartTotal").textContent = fmt(Cart.subtotal());
+        document.querySelectorAll('input[data-act="set"][data-key]').forEach(inp=>{ const key = inp.getAttribute("data-key"); inp.value = Cart.data[key]?.qty || 0; });
+        this.checkoutSync();
+      },
+      shippingFee(){
+        const mode = document.getElementById("f_mode").value;
+        const zone = document.getElementById("f_zone").value;
+        return mode==="delivery" ? (Zones[zone]||0) : 0;
+      },
+      discounts(sub){ 
+        const coupon = (document.getElementById("f_coupon").value||"").trim().toUpperCase();
+        const payment = document.getElementById("f_payment").value;
+        let disc = 0;
+        if(coupon==="BIENVENIDO10") disc += Math.round(sub*0.10);
+        if(payment==="efectivo") disc += Math.round(sub*0.05);
+        return disc;
+      },
+      checkoutSync(){
+        const mode = document.getElementById("f_mode").value;
+        document.getElementById("rowAddress").style.display = (mode==="delivery") ? "grid":"none";
+        const sub = Cart.subtotal();
+        const ship = this.shippingFee();
+        const disc = this.discounts(sub);
+        document.getElementById("sum_sub").textContent = fmt(sub);
+        document.getElementById("sum_ship").textContent = fmt(ship);
+        document.getElementById("sum_disc").textContent = "-" + fmt(disc);
+        document.getElementById("sum_total").textContent = fmt(Math.max(0, sub + ship - disc));
+
+        const pay = document.getElementById("f_payment").value;
+        const hints = document.getElementById("payHints");
+        if(pay==="transferencia") hints.textContent = "Transferencia: te enviaremos alias/CBU al confirmar.";
+        else if(pay==="mercadopago") hints.textContent = "Mercado Pago: te enviaremos un link de pago al confirmar.";
+        else hints.textContent = "Efectivo: recordá tener cambio (5% off aplicado).";
+      },
+      confirmOrder(){
+        if(Cart.count()===0){ toast("Carrito vacío"); return; }
+        const order = {
+          items: Cart.items(),
+          customer: {
+            name: document.getElementById("f_name").value.trim(),
+            email: document.getElementById("f_email").value.trim(),
+            phone: document.getElementById("f_phone").value.trim(),
+            mode: document.getElementById("f_mode").value,
+            address: document.getElementById("f_address").value.trim(),
+            zone: document.getElementById("f_zone").value,
+            payment: document.getElementById("f_payment").value,
+            coupon: (document.getElementById("f_coupon").value||"").trim().toUpperCase()
+          },
+          totals: {
+            subtotal: Cart.subtotal(),
+            shipping: this.shippingFee(),
+            discount: this.discounts(Cart.subtotal()),
+            total: Math.max(0, Cart.subtotal() + this.shippingFee() - this.discounts(Cart.subtotal()))
+          },
+          createdAt: new Date().toISOString()
+        };
+        try{ localStorage.setItem("shop_last_order", JSON.stringify(order)) }catch{}
+        document.getElementById("orderOk").style.display = "block";
+        toast("Pedido confirmado");
+
+        const phone = WHATSAPP_NUMBER.replace(/\D/g,"");
+        const lines = order.items.map(it => `• ${it.name} x${it.qty} – ${fmt(it.price*it.qty)}`);
+        const info = [
+          `👤 ${order.customer.name||"Cliente"}`,
+          order.customer.phone ? `📞 ${order.customer.phone}` : "",
+          order.customer.mode==="delivery" ? `🚚 Delivery` : "🏬 Retiro en local",
+          order.customer.address ? `📍 ${order.customer.address}` : "",
+          order.customer.zone ? `🗺️ Zona: ${order.customer.zone}` : "",
+          `💳 Pago: ${order.customer.payment}${order.customer.coupon? " • Cupón: "+order.customer.coupon : ""}`
+        ].filter(Boolean).join("\n");
+        const msg = [
+          `*Pedido La Peruana*`,
+          info,
+          `\n*Detalle:*`,
+          lines.join("\n"),
+          `\nSubtotal: ${fmt(order.totals.subtotal)}`,
+          order.totals.shipping>0 ? `Envío: ${fmt(order.totals.shipping)}` : null,
+          order.totals.discount>0 ? `Descuentos: -${fmt(order.totals.discount)}` : null,
+          `*Total:* ${fmt(order.totals.total)}`
+        ].filter(Boolean).join("\n");
+        const encoded = encodeURIComponent(msg);
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const urlDesktop = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
+        const urlMobile  = `https://wa.me/${phone}?text=${encoded}`;
+        const a = document.createElement("a"); a.href = isMobile ? urlMobile : urlDesktop; a.target="_blank"; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
+      }
+    };
+
+    UI.init();
   </script>
 </body>
 </html>
