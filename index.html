@@ -275,21 +275,13 @@
         <label>Dirección</label>
         <input id="f_address" class="field" placeholder="Calle, número, depto, referencias">
       </div>
-      <div>
-        <label>Zona</label>
-        <select id="f_zone" class="field">
-          <option value="">Seleccionar</option>
-          <option value="centro">Centro — $1500</option>
-          <option value="parana-este">Paraná Este — $2200</option>
-          <option value="area-metropolitana">Área Metropolitana — $3000</option>
-        </select>
-      </div>
+      
     </div>
     <div class="row">
       <div>
         <label>Pago</label>
         <select id="f_payment" class="field">
-          <option value="efectivo">Efectivo (5% off)</option>
+          <option value="efectivo">Efectivo</option>
           <option value="transferencia">Transferencia</option>
           <option value="mercadopago">Mercado Pago</option>
         </select>
@@ -302,7 +294,8 @@
 
     <div class="summary">
       <div class="line"><span>Subtotal</span><strong id="sum_sub">$0</strong></div>
-      <div class="line"><span>Envío</span><strong id="sum_ship">$0</strong></div>
+<div class="line"><span>Envío</span><strong>Se cotizará según el volumen del pedido y la zona</strong></div>
+      
       <div class="line"><span>Descuentos</span><strong id="sum_disc">-$0</strong></div>
       <div class="line" style="border-bottom:0"><span>Total</span><strong id="sum_total">$0</strong></div>
     </div>
@@ -550,7 +543,7 @@
         document.getElementById("apply").onclick = ()=>{ State.minp = document.getElementById("minp").value; State.maxp = document.getElementById("maxp").value; this.grid(); };
         document.getElementById("clear").onclick = ()=>{ State.minp=""; State.maxp=""; document.getElementById("minp").value=""; document.getElementById("maxp").value=""; this.grid(); };
         document.getElementById("f_mode").onchange = ()=> this.checkoutSync();
-        document.getElementById("f_zone").onchange = ()=> this.checkoutSync();
+        /* zona eliminada */
         document.getElementById("f_payment").onchange = ()=> this.checkoutSync();
         document.getElementById("f_coupon").oninput = ()=> this.checkoutSync();
                         document.getElementById("btnConfirm").onclick = ()=> this.confirmOrder();
@@ -625,26 +618,24 @@
         this.checkoutSync();
       },
       shippingFee(){
-        const mode = document.getElementById("f_mode").value;
-        const zone = document.getElementById("f_zone").value;
-        return mode==="delivery" ? (Zones[zone]||0) : 0;
+        return 0; // zona/envío deshabilitados
       },
       discounts(sub){ 
         const coupon = (document.getElementById("f_coupon").value||"").trim().toUpperCase();
         const payment = document.getElementById("f_payment").value;
         let disc = 0;
         if(coupon==="BIENVENIDO10") disc += Math.round(sub*0.10);
-        if(payment==="efectivo") disc += Math.round(sub*0.05);
+        
         return disc;
       },
       checkoutSync(){
         const mode = document.getElementById("f_mode").value;
         document.getElementById("rowAddress").style.display = (mode==="delivery") ? "grid":"none";
         const sub = Cart.subtotal();
-        const ship = this.shippingFee();
+        const ship = 0; // envío deshabilitado
         const disc = this.discounts(sub);
         document.getElementById("sum_sub").textContent = fmt(sub);
-        document.getElementById("sum_ship").textContent = fmt(ship);
+        if(document.getElementById("sum_ship")){ document.getElementById("sum_ship").textContent = fmt(ship); }
         document.getElementById("sum_disc").textContent = "-" + fmt(disc);
         document.getElementById("sum_total").textContent = fmt(Math.max(0, sub + ship - disc));
 
@@ -652,7 +643,7 @@
         const hints = document.getElementById("payHints");
         if(pay==="transferencia") hints.textContent = "Transferencia: te enviaremos alias/CBU al confirmar.";
         else if(pay==="mercadopago") hints.textContent = "Mercado Pago: te enviaremos un link de pago al confirmar.";
-        else hints.textContent = "Efectivo: recordá tener cambio (5% off aplicado).";
+        else hints.textContent = "Efectivo: recordá tener cambio exacto.";
       },
       confirmOrder(){
         if(Cart.count()===0){ toast("Carrito vacío"); return; }
@@ -664,7 +655,7 @@
             phone: document.getElementById("f_phone").value.trim(),
             mode: document.getElementById("f_mode").value,
             address: document.getElementById("f_address").value.trim(),
-            zone: document.getElementById("f_zone").value,
+            
             payment: document.getElementById("f_payment").value,
             coupon: (document.getElementById("f_coupon").value||"").trim().toUpperCase()
           },
@@ -687,8 +678,7 @@
           order.customer.phone ? `📞 ${order.customer.phone}` : "",
           order.customer.mode==="delivery" ? `🚚 Delivery` : "🏬 Retiro en local",
           order.customer.address ? `📍 ${order.customer.address}` : "",
-          order.customer.zone ? `🗺️ Zona: ${order.customer.zone}` : "",
-          `💳 Pago: ${order.customer.payment}${order.customer.coupon? " • Cupón: "+order.customer.coupon : ""}`
+                    `💳 Pago: ${order.customer.payment}${order.customer.coupon? " • Cupón: "+order.customer.coupon : ""}`
         ].filter(Boolean).join("\n");
         const msg = [
           `*Pedido La Peruana*`,
@@ -696,7 +686,7 @@
           `\n*Detalle:*`,
           lines.join("\n"),
           `\nSubtotal: ${fmt(order.totals.subtotal)}`,
-          order.totals.shipping>0 ? `Envío: ${fmt(order.totals.shipping)}` : null,
+          
           order.totals.discount>0 ? `Descuentos: -${fmt(order.totals.discount)}` : null,
           `*Total:* ${fmt(order.totals.total)}`
         ].filter(Boolean).join("\n");
