@@ -134,6 +134,59 @@
 [data-theme="light"] strong { color:#0f172a !important; }
 
 </style>
+
+<style>
+/* ===== Overlay de texto SOLO en modo claro ===== */
+[data-theme="light"] .card {
+  display: grid;                 /* apila .thumb y .info */
+}
+
+[data-theme="light"] .thumb,
+[data-theme="light"] .info {
+  grid-area: 1 / 1;              /* misma celda para superposición */
+}
+
+[data-theme="light"] .thumb {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+[data-theme="light"] .thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* degradado oscuro desde abajo para legibilidad del texto */
+  background: linear-gradient(to top, rgba(0,0,0,.60), rgba(0,0,0,0));
+  z-index: 0;
+}
+
+[data-theme="light"] .thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;                   /* imagen siempre detrás */
+}
+
+[data-theme="light"] .info {
+  position: relative;
+  z-index: 1;                    /* texto por encima de la imagen */
+  align-self: end;               /* alineado al pie de la tarjeta */
+  padding: 12px;
+  gap: 6px;
+}
+
+[data-theme="light"] .info .name,
+[data-theme="light"] .info .unit,
+[data-theme="light"] .info .price {
+  color: var(--text) !important; /* usa el token del tema claro (texto oscuro) */
+  text-shadow: 0 1px 2px rgba(255,255,255,.25), 0 0 1px rgba(0,0,0,.25);
+  /* sutil halo para contraste sobre fotos claras y oscuras */
+}
+</style>
+
 </head>
 <body>
   <header>
