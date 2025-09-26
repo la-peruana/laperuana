@@ -305,16 +305,42 @@
   <div class="toast" id="toast">Agregado al carrito</div>
 
   <script>
-    // === CONFIG ===
-    const WHATSAPP_NUMBER = "+5493435075991"; // recepción
-    // Pega aquí tu GVIZ o pásalo por ?sheets=URL. Si se deja vacío, NO intenta cargar.
-    let SHEETS_GVIZ_URL = "https://docs.google.com/spreadsheets/d/1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem/edit?gid=1645617335#gid=1645617335";
+   // === CONFIG ===
+const WHATSAPP_NUMBER = "+5493435075991"; // recepción
 
-    const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%230b1220'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='28' font-family='Arial'>Imagen no disponible</text></svg>";
+// ID + gid por defecto (opcional — sólo para preconfigurar)
+const DEFAULT_SHEET_ID = "1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem";
+const DEFAULT_GID = "1645617335";
 
-    const CURRENCY = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS", maximumFractionDigits:0});
-    const fmt = n => CURRENCY.format(n);
-    const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+// Usa el valor guardado en localStorage si existe; si no, usa GVIZ correcto.
+// (ANTES tenías un link de edición /edit?... que rompe la carga)
+let SHEETS_GVIZ_URL =
+  localStorage.getItem("sheets_gviz_url") ||
+  `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
+
+// Normaliza cualquier URL (edit/share/csv) a GVIZ JSON válido
+function normalizeSheetsUrl(u) {
+  if (!u) return "";
+  try {
+    const url = new URL(u);
+    // ya es gviz
+    if (url.pathname.includes("/gviz/tq")) return u;
+
+    // intenta extraer /d/<ID> y gid o sheet
+    const m = url.pathname.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    const id = m?.[1];
+    const gid = url.searchParams.get("gid") || (/gid=(\d+)/.exec(u)?.[1] ?? "");
+    const sheet = url.searchParams.get("sheet") || "";
+
+    if (id && (gid || sheet)) {
+      const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`;
+      return base + (gid ? `&gid=${gid}` : `&sheet=${encodeURIComponent(sheet)}`);
+    }
+  } catch {}
+  // fallback: devuelve tal cual
+  return u;
+}
+
 
     const Categories = [
   { id:"rotiseria", name:"Rotisería", icon:"fa-utensils" },
