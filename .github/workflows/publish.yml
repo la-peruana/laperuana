@@ -1,0 +1,46 @@
+name: Build & Deploy La Peruana
+
+on:
+  workflow_dispatch: {}        # te permite “Run workflow” a mano
+  push:
+    branches: [ main ]         # se publica al hacer push a main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # (Opcional) Traer la planilla como CSV (ajusta el gid si cambia)
+      - name: Download catalog CSV from Google Sheets
+        run: |
+          mkdir -p data
+          curl -L "https://docs.google.com/spreadsheets/d/1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem/export?format=csv&gid=1645617335" -o data/catalogo.csv
+
+      # (Opcional) Si tenés un script que construye el HTML desde el CSV:
+      # - name: Build site
+      #   run: node scripts/build.js
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .               # publica todo el repo (cambiá a /dist si compilás)
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
