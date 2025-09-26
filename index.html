@@ -30,17 +30,25 @@
     .logo{
       display:flex; align-items:center; gap:10px;
       font-weight:800; letter-spacing:.3px;
-    }
-    .logo img{ width:36px; height:36px; object-fit:contain; border-radius:8px }
-    .grow{ flex:1 }
-    .toolbar{ display:flex; gap:8px; align-items:center }
-    .btn{
-      display:inline-flex; align-items:center; gap:8px;
-      background: var(--card); color: var(--text);
-      border:1px solid rgba(255,255,255,.08);
-      padding:8px 12px; border-radius:12px; cursor:pointer;
-      box-shadow: var(--shadow);
-    }
+/* Tamaño controlado y responsive */
+.logo img{
+  height: 36px;       /* cambiá a 48px si querés más grande */
+  width: auto;
+  object-fit: contain;
+  border-radius: 8px; /* quitá si no lo querés redondeado */
+}
+
+/* Si tu logo es oscuro y en tema oscuro “se pierde”, dale fondo sutil */
+.logo img{
+  background: color-mix(in oklab, var(--card) 85%, transparent);
+  padding: 4px;
+}
+
+/* Si el logo es muy claro y en tema claro no contrasta, agregá borde/sombra */
+[data-theme="light"] .logo img{
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+}
+
     .btn:hover{ transform: translateY(-1px); }
     main{ max-width:1200px; margin:22px auto; padding: 0 16px 40px }
     #status{
