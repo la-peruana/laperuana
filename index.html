@@ -4,694 +4,292 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>La Peruana — Tienda Online</title>
-  <meta name="description" content="E-commerce sin backend — Tienda online de La Peruana" />
+  <meta name="description" content="E-commerce sin backend — La Peruana" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
   <style>
-    :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e2e8f0; --primary:#22c55e; --primary-600:#16a34a; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:18px; }
-    [data-theme="light"]{ --bg:#f8fafc; --card:#ffffff; --muted:#64748b; --text:#0f172a; --shadow:0 10px 30px rgba(0,0,0,.10); }
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
-    header{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);background:rgba(15,23,42,.75);border-bottom:1px solid rgba(148,163,184,.15)}
-    [data-theme="light"] header{background:rgba(255,255,255,.9)}
-    .h-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
-    .brand i{color:var(--primary);font-size:28px}
-    .search{position:relative;flex:1;min-width:260px;max-width:520px}
-    .search input{width:100%;padding:12px 42px;border-radius:999px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
-    [data-theme="light"] .search input{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
-    .toggle,.btn-lite{border:1px solid rgba(148,163,184,.25);padding:8px 10px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;background:#0b1220;color:var(--text)}
-    [data-theme="light"] .toggle,[data-theme="light"] .btn-lite{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .layout{max-width:1200px;margin:0 auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:16px}
-    @media(max-width:980px){ .layout{grid-template-columns:1fr} }
-    .side{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
-    .cats button{width:100%;text-align:left;margin-bottom:6px;padding:10px;border-radius:12px;border:1px solid rgba(148,163,184,.2);background:#0b1220;color:var(--text);cursor:pointer}
-    [data-theme="light"] .cats button{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .cats button.active{border-color:var(--primary)}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-    .toolbar select, .toolbar input{padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
-    [data-theme="light"] .toolbar select, [data-theme="light"] .toolbar input{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-    .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
-    .thumb{height:90px;background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(6,182,212,.12));display:grid;place-items:center;color:#a7f3d0;font-size:32px}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .info{padding:12px;display:flex;flex-direction:column;gap:6px}
-    .name{font-weight:900;line-height:1.15} .unit{font-size:12px;color:var(--muted)} .price{font-weight:900}
-    .actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:auto}
-    .btn{border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text);border-radius:10px;padding:10px 12px;cursor:pointer}
-    [data-theme="light"] .btn{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .qty{display:flex;gap:6px;align-items:center}
-    .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#0b1220;color:var(--text)}
-    [data-theme="light"] .qty .icon{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .cartbar{position:sticky;bottom:0;background:rgba(15,23,42,.85);backdrop-filter:blur(8px);border-top:1px solid rgba(148,163,184,.2);padding:8px 16px;z-index:10}
-    [data-theme="light"] .cartbar{background:rgba(255,255,255,.95)}
-    .cartbar .inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .checkout{max-width:900px;margin:20px auto;background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px} @media(max-width:700px){ .row{grid-template-columns:1fr} }
-    .field, select{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;color:var(--text)}
-    [data-theme="light"] .field, [data-theme="light"] select{background:#fff;border-color:#e2e8f0;color:#0f172a}
-    .summary{margin-top:12px;padding:12px;border-radius:10px;background:#0b1220;border:1px solid rgba(148,163,184,.2)}
-    [data-theme="light"] .summary{background:#f8fafc;border-color:#e2e8f0}
-    .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(148,163,184,.2)}
-    .toast{position:fixed;right:12px;bottom:12px;background:#052e16;color:#bbf7d0;border:1px solid #166534;padding:10px 12px;border-radius:10px;display:none;z-index:1000}
-    .toast.show{display:block}
+    :root{
+      --bg:#0f172a; --card:#111827; --text:#e2e8f0; --muted:#94a3b8;
+      --primary:#22c55e; --primary-600:#16a34a;
+      --shadow:0 10px 30px rgba(0,0,0,.30);
+      --radius:18px;
+    }
+    [data-theme="light"]{
+      --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --muted:#475569;
+    }
+    *{ box-sizing:border-box }
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    header{
+      position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
+      background: color-mix(in oklab, var(--bg) 70%, transparent);
+      display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .logo{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; letter-spacing:.3px;
+    }
+    .logo img{ width:36px; height:36px; object-fit:contain; border-radius:8px }
+    .grow{ flex:1 }
+    .toolbar{ display:flex; gap:8px; align-items:center }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      background: var(--card); color: var(--text);
+      border:1px solid rgba(255,255,255,.08);
+      padding:8px 12px; border-radius:12px; cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    main{ max-width:1200px; margin:22px auto; padding: 0 16px 40px }
+    #status{
+      margin:8px 0 14px; color:var(--muted); font-size:.95rem;
+      display:flex; align-items:center; gap:8px;
+    }
+    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px }
+    section{ margin: 18px 0 28px }
+    section h2{ margin: 6px 4px 12px; font-size:1.05rem; color:var(--muted) }
 
-    /* ==== Light theme readability hardening ==== */
-    [data-theme="light"] .card { background:#ffffff; border-color:#e2e8f0; }
-    [data-theme="light"] .thumb { background:#f1f5f9; }
-    [data-theme="light"] .info { color:#0f172a; }
-    [data-theme="light"] .info .name { color:#0f172a; font-weight:900; }
-    [data-theme="light"] .info .unit { color:#475569; }
-    [data-theme="light"] .info .price { color:#0f172a; font-weight:900; }
-    [data-theme="light"] .qty .icon { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .field { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .btn { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .cartbar { background:rgba(255,255,255,.97); }
+    article.card{
+      background:var(--card); color:var(--text); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow:hidden; border:1px solid rgba(255,255,255,.06);
+      display:flex; flex-direction:column; min-height: 320px;
+    }
+    .media{ width:100%; height:200px; background:#0b1220; overflow:hidden }
+    .media img{ width:100%; height:100%; object-fit:cover; display:block }
+    .content{ padding:12px }
+    .title{ margin:4px 0 2px; font-size:1rem; font-weight:700; line-height:1.25 }
+    .subtitle{ color:var(--muted); font-size:.9rem }
+    .price{ margin-top:8px; font-weight:800 }
+    .link{
+      margin: 10px 12px 14px; display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:12px; background: color-mix(in oklab, var(--primary) 86%, black 0%);
+      color:#052e14; font-weight:700; text-decoration:none; justify-content:center;
+    }
+    .link:hover{ filter:brightness(.95) }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0 }
 
-  
-/* === FORCE LIGHT THEME READABILITY OVERRIDES === */
-[data-theme="light"] .card { background:#ffffff !important; border-color:#e2e8f0 !important; }
-[data-theme="light"] .thumb { background:#f1f5f9 !important; }
-[data-theme="light"] .info { color:#0f172a !important; }
-[data-theme="light"] .info .name { color:#0f172a !important; font-weight:900 !important; }
-[data-theme="light"] .info .unit { color:#475569 !important; }
-[data-theme="light"] .info .price { color:#0f172a !important; font-weight:900 !important; }
-[data-theme="light"] .qty .icon { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
-[data-theme="light"] .field, 
-[data-theme="light"] select { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
-[data-theme="light"] .btn { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
-[data-theme="light"] .cartbar { background:rgba(255,255,255,.97) !important; }
-
-
-/* === ULTIMATE LIGHT THEME TEXT OVERRIDE === */
-[data-theme="light"] .card, 
-[data-theme="light"] .card * {
-  color: #0f172a !important; /* force dark text across the card */
-}
-/* Then, soften secondary text */
-[data-theme="light"] .card .unit {
-  color: #475569 !important;
-}
-/* Price stays dark and bold */
-[data-theme="light"] .card .price {
-  color: #0f172a !important;
-  font-weight: 900 !important;
-}
-
-
-/* === Chrome-proof light theme text + placeholders === */
-[data-theme="light"] body,
-[data-theme="light"] .side,
-[data-theme="light"] .toolbar,
-[data-theme="light"] .cats button,
-[data-theme="light"] .search input,
-[data-theme="light"] .field,
-[data-theme="light"] select,
-[data-theme="light"] .btn,
-[data-theme="light"] .cartbar,
-[data-theme="light"] .checkout,
-[data-theme="light"] .line {
-  color: #0f172a !important;
-}
-
-/* Placeholder text in inputs */
-[data-theme="light"] input::placeholder,
-[data-theme="light"] textarea::placeholder {
-  color: #64748b !important;
-  opacity: 1 !important;
-}
-
-/* Force name/unit/price again (belt & suspenders) */
-[data-theme="light"] .info,
-[data-theme="light"] .info .name,
-[data-theme="light"] .info .price { color:#0f172a !important; }
-[data-theme="light"] .info .unit { color:#475569 !important; }
-
-/* Fix icon buttons contrast */
-[data-theme="light"] .qty .icon i,
-[data-theme="light"] .cats button i { color:#0f172a !important; }
-
-/* Ensure links and strong text are dark */
-[data-theme="light"] a, 
-[data-theme="light"] strong { color:#0f172a !important; }
-
-</style>
-
-<style>
-/* ===== Overlay de texto SOLO en modo claro ===== */
-[data-theme="light"] .card {
-  display: grid;                 /* apila .thumb y .info */
-}
-
-[data-theme="light"] .thumb,
-[data-theme="light"] .info {
-  grid-area: 1 / 1;              /* misma celda para superposición */
-}
-
-[data-theme="light"] .thumb {
-  position: relative;
-  height: 180px;
-  overflow: hidden;
-}
-
-[data-theme="light"] .thumb::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  /* degradado oscuro desde abajo para legibilidad del texto */
-  background: linear-gradient(to top, rgba(0,0,0,.60), rgba(0,0,0,0));
-  z-index: 0;
-}
-
-[data-theme="light"] .thumb img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;                   /* imagen siempre detrás */
-}
-
-[data-theme="light"] .info {
-  position: relative;
-  z-index: 1;                    /* texto por encima de la imagen */
-  align-self: end;               /* alineado al pie de la tarjeta */
-  padding: 12px;
-  gap: 6px;
-}
-
-[data-theme="light"] .info .name,
-[data-theme="light"] .info .unit,
-[data-theme="light"] .info .price {
-  color: var(--text) !important; /* usa el token del tema claro (texto oscuro) */
-  text-shadow: 0 1px 2px rgba(255,255,255,.25), 0 0 1px rgba(0,0,0,.25);
-  /* sutil halo para contraste sobre fotos claras y oscuras */
-}
-</style>
-
+    /* Skeleton loader */
+    .skeleton{
+      animation: pulse 1.2s infinite ease-in-out;
+      background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.08), rgba(255,255,255,.04));
+      background-size: 200% 100%;
+    }
+    @keyframes pulse{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  </style>
 </head>
+
 <body>
   <header>
-      </div>
-      <div class="search">
-        <img src="LOGO-LA-PERUANA.jpg" alt="La Peruana" class="logo">
-        <input id="q" placeholder="Buscar (ej: medialuna, sandwich, queso…)">
-      </div>
-      <div style="display:flex;gap:8px;align-items:center"><button class="btn-lite" id="btnConnectSheets"><i class="fa-solid fa-plug"></i> Conectar Sheets</button>
-        <button class="btn-lite" id="btnSync"><i class="fa-solid fa-rotate"></i> Actualizar catálogo</button>
-        <div class="toggle" id="themeToggle" title="Cambiar tema"><i class="fa-solid fa-moon"></i> <span id="themeLabel">Oscuro</span></div>
-      </div>
+    <div class="logo">
+      <!-- Reemplazá src por tu logo si querés -->
+      <img src="https://via.placeholder.com/120x120?text=LP" alt="La Peruana Logo">
+      <div>La Peruana — Tienda Online</div>
+    </div>
+    <div class="grow"></div>
+    <div class="toolbar">
+      <button id="themeBtn" class="btn" type="button" title="Cambiar tema">
+        <i class="fa-solid fa-circle-half-stroke"></i> Tema
+      </button>
+      <button id="reloadBtn" class="btn" type="button" title="Recargar catálogo">
+        <i class="fa-solid fa-rotate-right"></i> Recargar
+      </button>
     </div>
   </header>
 
-  <div class="layout">
-    <aside class="side">
-      <h3>Categorías</h3>
-      <div id="cats" class="cats"></div>
-      <hr style="border-color:rgba(148,163,184,.2)">
-      <h3>Filtros</h3>
-      <div class="toolbar">
-        <select id="sort">
-          <option value="relevance">Ordenar: Relevancia</option>
-          <option value="price_asc">Precio ↑</option>
-          <option value="price_desc">Precio ↓</option>
-          <option value="alpha">A–Z</option>
-        </select>
-        <input id="minp" class="field" placeholder="Precio min">
-        <input id="maxp" class="field" placeholder="Precio max">
-        <button class="btn" id="apply">Aplicar</button>
-        <button class="btn" id="clear">Limpiar</button>
-      </div>
-    </aside>
-
-    <main>
-      <div class="grid" id="grid"></div>
-    </main>
-  </div>
-
-  <div class="cartbar">
-    <div class="inner">
-      <div><strong id="cartCount">0 ítems</strong></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <strong id="cartTotal">$0</strong>
-        <button class="btn" id="btnClearCartBar">Limpiar carrito</button>
-        <a href="#checkout" class="btn primary">Ir al checkout</a>
-      </div>
-    </div>
-  </div>
-
-  <section id="checkout" class="checkout">
-    <h2>Checkout</h2>
-    <div class="row">
-      <div>
-        <label>Nombre y apellido</label>
-        <input id="f_name" class="field" autocomplete="name">
-      </div>
-      <div>
-        <label>Email</label>
-        <input id="f_email" class="field" autocomplete="email">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Teléfono</label>
-        <input id="f_phone" class="field" autocomplete="tel">
-      </div>
-      <div>
-        <label>Modo de entrega</label>
-        <select id="f_mode">
-          <option value="delivery">Delivery</option>
-          <option value="pickup">Retiro en local</option>
-        </select>
-      </div>
-    </div>
-    <div class="row" id="rowAddress">
-      <div>
-        <label>Dirección</label>
-        <input id="f_address" class="field" placeholder="Calle, número, depto, referencias">
-      </div>
-      
-    </div>
-    <div class="row">
-      <div>
-        <label>Pago</label>
-        <select id="f_payment" class="field">
-          <option value="efectivo">Efectivo</option>
-          <option value="transferencia">Transferencia</option>
-          <option value="mercadopago">Mercado Pago</option>
-        </select>
-      </div>
-      <div>
-        <label>Cupón</label>
-        <input id="f_coupon" class="field" placeholder="BIENVENIDO10">
-      </div>
-    </div>
-
-    <div class="summary">
-      <div class="line"><span>Subtotal</span><strong id="sum_sub">$0</strong></div>
-<div class="line"><span>Envío</span><strong>Se cotizará según el volumen del pedido y la zona</strong></div>
-      
-      <div class="line"><span>Descuentos</span><strong id="sum_disc">-$0</strong></div>
-      <div class="line" style="border-bottom:0"><span>Total</span><strong id="sum_total">$0</strong></div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-      <button class="btn" id="btnClearCart">Limpiar carrito</button>
-      <button class="btn primary" id="btnConfirm">Confirmar pedido</button>
-    </div>
-
-    <p id="payHints" style="color:var(--muted);font-size:12px;margin-top:8px"></p>
-    <div id="orderOk" style="display:none;margin-top:12px" class="summary">✅ Pedido confirmado. Abrimos WhatsApp con tu orden.</div>
-  </section>
-
-  <div class="toast" id="toast">Agregado al carrito</div>
+  <main>
+    <div id="status"><i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…</div>
+    <div id="catalogo"></div>
+  </main>
 
   <script>
-    // === CONFIG ===
-    const WHATSAPP_NUMBER = "+5493435075991"; // recepción
-    // Pega aquí tu GVIZ o pásalo por ?sheets=URL. Si se deja vacío, NO intenta cargar.
-    let SHEETS_GVIZ_URL = "https://docs.google.com/spreadsheets/d/1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem/edit?usp=drive_link&ouid=116710970229033830451&rtpof=true&sd=true";
+  ;(() => {
+    // ========= CONFIG =========
+    const SHEET_ID = '1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem'; // Tu Google Sheet
+    const GID      = '1645617335';                         // Pestaña del catálogo
+    const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-    const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%230b1220'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='28' font-family='Arial'>Imagen no disponible</text></svg>";
-
-    const CURRENCY = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS", maximumFractionDigits:0});
-    const fmt = n => CURRENCY.format(n);
-    const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
-
-    const Categories = [
-  { id:"rotiseria", name:"Rotisería", icon:"fa-utensils" },
-  { id:"panaderia", name:"Panadería", icon:"fa-bread-slice" },
-  { id:"pasteleria", name:"Pastelería", icon:"fa-cake-candles" },
-  { id:"carniceria", name:"Carnicería", icon:"fa-drumstick-bite" },
-  { id:"verduleria", name:"Verdulería", icon:"fa-carrot" },
-  { id:"fiambreria", name:"Fiambrería", icon:"fa-cheese" },
-  { id:"almacen", name:"Almacén", icon:"fa-boxes-stacked" },
-  { id:"bebidas", name:"Bebidas", icon:"fa-champagne-glasses" },
-  { id:"cafeteria", name:"Cafetería", icon:"fa-mug-saucer" }
-];
-    let Catalog = {
-      rotiseria:[
-        { name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" },
-        { name:"Torrejas de acelga", price:1225, unit:"x 3 unidades" },
-        { name:"Sándwich Simples", price:12846, unit:"bandeja x 6 un." },
-        { name:"Sándwich Triples", price:13588, unit:"bandeja x 6 un." },
-        { name:"Tortilla de papas", price:4782, unit:"porción" },
-        { name:"Tortilla de acelga", price:4863, unit:"porción" },
-        { name:"Terrina", price:3633, unit:"porción" },
-        { name:"Papas fritas", price:2591, unit:"porción" },
-        { name:"Hamburguesa Cheddar c- papas", price:8298, unit:"unidad" },
-        { name:"Hamburguesa LP c- papas", price:7447, unit:"unidad" },
-        { name:"Patamuslo", price:13196, unit:"unidad" },
-        { name:"Sándwich milanesa de pollo", price:5637, unit:"unidad" },
-        { name:"Sándwich milanesa de carne", price:8176, unit:"unidad" },
-        { name:"Sándwich milanesa de carne completo", price:9638, unit:"unidad" },
-        { name:"Pebete de jamón y queso", price:4782, unit:"unidad" },
-        { name:"Empanadas de choclo", price:6168, unit:"x 3 un." },
-        { name:"Empanadas de jamón y queso", price:4875, unit:"x 3 un." },
-        { name:"Empanadas Calabresa", price:4190, unit:"unidad" },
-        { name:"Empanadas de carne dulce", price:5551, unit:"x 3 un." },
-        { name:"Empanadas de verdura", price:4278, unit:"x 3 un." },
-        { name:"Empanadas de carne saladas", price:4923, unit:"x 3 un." },
-        { name:"Empanadas de pollo", price:4713, unit:"x 3 un." },
-        { name:"Milanesas de carne", price:11258, unit:"unidad" },
-        { name:"Milanesas de pollo", price:8344, unit:"unidad" }
-      ],
-      panaderia:[
-        { name:"Facturas con crema", price:2177, unit:"x 3 un." },
-        { name:"Facturas con crema y membrillo", price:2613, unit:"x 3 un." },
-        { name:"Facturas con crema y dulce de leche", price:1960, unit:"x 3 un." },
-        { name:"Medialunas con dulce de leche", price:0, unit:"x 3 un." },
-        { name:"Medialunas dulces", price:0, unit:"x 3 unidades" },
-        { name:"Vigilantes de batata", price:2504, unit:"x 3 un." },
-        { name:"Vigilantes de membrillo", price:2308, unit:"x 3 un." },
-        { name:"Bollitos con crema", price:2068, unit:"x 3 un." },
-        { name:"Bollitos con dulce de leche", price:1960, unit:"x 3 un." },
-        { name:"Empanaditas de dulce de leche", price:1415, unit:"x 3 un." },
-        { name:"Pirulines", price:2177, unit:"x 3 un." },
-        { name:"Borrachitos", price:1960, unit:"x 3 un." },
-        { name:"Medialunas Marplatenses", price:1933, unit:"x 3 unidades" },
-        { name:"Especiales", price:2363, unit:"250 grs" },
-        { name:"Pan Francés", price:740, unit:"250 grs" },
-        { name:"Pan Rondín", price:715, unit:"250 grs" },
-        { name:"Galleta de campo", price:840, unit:"250 grs" },
-        { name:"Galleta hojaldrada", price:1018, unit:"250 grs" },
-        { name:"Suizos", price:3319, unit:"unidad" },
-        { name:"Medialunas saladas grandes", price:3281, unit:"250 grs" },
-        { name:"Medialunas saladas chicas", price:4024, unit:"250 grs" },
-        { name:"Croissant", price:2464, unit:"unidad" }
-      ],
-      pasteleria:[
-        { name:"Cheese cake individual", price:6362, unit:"unidad" },
-        { name:"Mini bombón", price:1019, unit:"unidad" },
-        { name:"Mini lemon pie", price:1019, unit:"unidad" },
-        { name:"Mini frutal", price:1551, unit:"unidad" },
-        { name:"Lingote de durazno", price:2038, unit:"unidad" },
-        { name:"Lingote de frutilla", price:2038, unit:"unidad" },
-        { name:"Red Velvet", price:1699, unit:"unidad" },
-        { name:"Tiramisú", price:3057, unit:"unidad" },
-        { name:"Masas finas", price:7427, unit:"x 7 un." },
-        { name:"Alfajores de maicena grandes", price:1362, unit:"x 2 un." },
-        { name:"Alfajores de maicena medianos", price:1424, unit:"x 3 un." },
-        { name:"Alfajores de maicena mini", price:1485, unit:"x 5 un." },
-        { name:"Alfajores de chocolate grandes", price:1820, unit:"x 2 un." },
-        { name:"Alfajores de chocolate medianos", price:1903, unit:"x 3 un." },
-        { name:"Alfajores de chocolate mini", price:1986, unit:"x 5 un." }
-      ],
-      carniceria:[
-        { name:"Milanesa de carne", price:13500, unit:"kg" },
-        { name:"Milanesa de pollo", price:12000, unit:"kg" },
-        { name:"Filet de pechuga", price:15500, unit:"kg" },
-        { name:"Costeletas cerdo", price:8400, unit:"kg" },
-        { name:"Hamburguesas carne común", price:8990, unit:"kg" },
-        { name:"Hamburguesas carne especial", price:17236, unit:"kg" },
-        { name:"Carne picada común", price:8990, unit:"kg" },
-        { name:"Carne picada especial", price:14260, unit:"kg" }
-      ],
-      verduleria:[
-        { name:"Zanahorias", price:984, unit:"kg" },
-        { name:"Tomates-redondos", price:5496, unit:"kg" },
-        { name:"Manzanas rojas", price:7458, unit:"kg" },
-        { name:"Bananas", price:4101, unit:"kg" }
-      ],
-      fiambreria:[
-        { name:"Bandeja Picada de fiambres surtidos LP x 800 grs (queso barra, bondiola, lomito, mortadela, jamón cocido, salame baston, pickles y aceitunas)", price:19600, unit:"bandeja" },
-        { name:"Bandeja picada de quesos surtidos LP x 500 grs", price:7435, unit:"bandeja" },
-        { name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" },
-        { name:"Bandeja Picada Paladini x 700 grs", price:15681, unit:"bandeja" },
-        { name:"Queso cremoso María Luisa x 500 grs", price:3955, unit:"bandeja" },
-        { name:"Queso barra María Luisa x 500 grs", price:4984, unit:"bandeja" },
-        { name:"Jamón cocido Lario feteado x 500 grs", price:11318, unit:"bandeja" },
-        { name:"Mortadela Paladini x 300 grs", price:5153, unit:"bandeja" }
-      ],
-      almacen:[
-        { name:"Paté de foie Molto", price:957, unit:"unidad" },
-        { name:"Puré de tomate Arcor", price:928, unit:"unidad" },
-        { name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" },
-        { name:"Fideos tallarín Matarazo", price:1855, unit:"unidad" },
-        { name:"Galletitas surtido Bagley", price:3560, unit:"unidad" },
-        { name:"Yerba Sinceridad", price:3931, unit:"x 1 kg" },
-        { name:"Aceite Natura", price:3978, unit:"900 ml" },
-        { name:"Azucar Ledesma", price:1648, unit:"x 1 kg" },
-        { name:"Celusal fina", price:1368, unit:"500 grs." },
-        { name:"Jabón liquido p-diluir ALA ropa", price:1540, unit:"150 ml." },
-        { name:"Suavizante Vivere clasico", price:3156, unit:"900 ml" },
-        { name:"Papel higienico Felpita", price:1820, unit:"4 x 30" }
-      ],
-      bebidas:[
-        { name:"Coca Cola 1.5L", price:3810, unit:"botella" },
-        { name:"Coca Cola 2.5L", price:4999, unit:"botella" },
-        { name:"Agua saborizadas Levité x 1.5L", price:1460, unit:"botella" },
-        { name:"Pritty Limón 2.25L", price:1910, unit:"botella" },
-        { name:"Pepsi 3L", price:2987, unit:"botella" },
-        { name:"Vino Otro Loco Más", price:4736, unit:"botella" },
-        { name:"Vino Finjamos Demencia", price:4784, unit:"botella" },
-        { name:"Vino Hormiga Negra", price:3394, unit:"botella" },
-        { name:"Cerveza Corona 330CC", price:3230, unit:"botella" },
-        { name:"Cerveza en lata Quilmes 473cc", price:1258, unit:"lata" },
-        { name:"Cerveza en lata Budweiser 473cc", price:1545, unit:"lata" }
-      ],
-      cafeteria:[
-        { name:"Café con leche grande + 2 medialunas marplatenses", price:4500, unit:"Combo" },
-        { name:"Café con leche grande + 2 medialunas saladas", price:3964, unit:"Combo" },
-        { name:"Café con leche grande + 2 alfajores de maicena", price:4473, unit:"Combo" },
-        { name:"Café con leche grande + Croissant", price:4473, unit:"Combo" },
-        { name:"Café con leche grande + 2 facturas", price:4500, unit:"Combo" },
-        { name:"Café con leche grande + 2 alfajores de chocolate", price:4473, unit:"Combo" }
-      ]
-    }; // fallback embebido
-
-    const State = { theme: localStorage.getItem("shop_theme") || "dark", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
-
-    const Cart = {
-      key:"shop_cart_v1",
-      data: {},
-      load(){ try{ this.data = JSON.parse(localStorage.getItem(this.key)) || {} }catch{ this.data = {} }; UI.sync() },
-      save(){ localStorage.setItem(this.key, JSON.stringify(this.data)); UI.sync() },
-      add(p){ const id=slug(p.name); if(!this.data[id]) this.data[id]={...p, qty:0}; this.data[id].qty++; this.save(); toast("Agregado") },
-      dec(id){ if(!this.data[id]) return; this.data[id].qty--; if(this.data[id].qty<=0) delete this.data[id]; this.save() },
-      set(id,q){ if(q<=0) delete this.data[id]; else if(this.data[id]) this.data[id].qty=q; this.save() },
-      clear(){ this.data={}; this.save() },
-      items(){ return Object.values(this.data) },
-      count(){ return this.items().reduce((a,b)=>a+b.qty,0) },
-      subtotal(){ return this.items().reduce((a,b)=>a+b.price*b.qty,0) }
+    // Columnas (0-based)
+    // A=Sector, B=Producto, C=Presentación, D=Precio, E=(libre), F=Imagen(URL), G=Link (opcional)
+    const COL = {
+      sector: 0,
+      nombre: 1,
+      presentacion: 2,
+      precio: 3,
+      imagen: 5,
+      link: 6
     };
 
-    const toast = (msg) => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1500) };
-    const Zones = { centro:1500, "parana-este":2200, "area-metropolitana":3000 };
+    // ========= HELPERS =========
+    const $ = (sel, ctx = document) => ctx.querySelector(sel);
+    const html = (strings, ...vals) => strings.reduce((a,s,i)=> a + s + (vals[i] ?? ''), '');
 
-    const Data = {
-      overrideFromQuery(){
-        try{ const u=new URL(location.href); const s=u.searchParams.get("sheets"); if(s) SHEETS_GVIZ_URL=s; }catch{}
-      },
-      async loadFromSheets() {
-        if(!SHEETS_GVIZ_URL) return; // no tocar catálogo si no hay URL
-        try{
-          const res = await fetch(SHEETS_GVIZ_URL, { cache:"no-store" });
-          const text = await res.text();
-          const json = JSON.parse(text.replace(/^.*setResponse\(/, "").replace(/\);?\s*$/, ""));
-          const rows = json.table.rows || [];
-          const tmp = {}; for(const c of Categories) tmp[c.id]=[];
-          for(const r of rows){
-            const c = r.c || [];
-            const category = (c[0]?.v||"").toString().trim();
-            const name = (c[1]?.v||"").toString().trim();
-            const price = parseInt((c[2]?.v||0), 10) || 0;
-            const unit  = (c[3]?.v||"").toString().trim();
-            const combo = String(c[4]?.v).toLowerCase()==="true";
-            const image = (c[5]?.v||"").toString().trim();
-            const stock = parseInt((c[6]?.v||999), 10) || 999;
-            const n = category.toLowerCase();
-            let id="almacen";
-            if(n.includes("cafeter")) id="cafeteria";
-            else if(n.includes("rotis")) id="rotiseria";
-            else if(n.includes("panad")) id="panaderia";
-            else if(n.includes("pastel")) id="pasteleria";
-            else if(n.includes("carnic")) id="carniceria";
-            else if(n.includes("verdul")) id="verduleria";
-            else if(n.includes("fiambr")||n.includes("queso")||n.includes("charcut")) id="fiambreria";
-            else if(n.includes("bebid")||n.includes("cerve")||n.includes("gaseosa")) id="bebidas";
-            const item={name,price,unit}; if(combo) item.combo=true; if(image) item.image=image; item.stock=stock;
-            tmp[id].push(item);
-          }
-          let imported = 0; for(const k in tmp) imported += tmp[k].length;
-          if(imported>0) { Catalog = tmp; UI.grid(); toast("Catálogo actualizado ("+imported+" ítems)"); }
-          else { toast("Sheet vacío: mantengo catálogo local"); }
-        }catch(e){
-          console.error(e); toast("No se pudo cargar el Sheet: mantengo catálogo local");
+    function parseCSV(str) {
+      // Parser robusto simple (comillas y comas)
+      const lines = str.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
+      return lines.map(line => {
+        const out = [];
+        let cur = '', inQuotes = false;
+        for (let i=0; i<line.length; i++){
+          const ch = line[i], nx = line[i+1];
+          if (ch === '"' && inQuotes && nx === '"'){ cur+='"'; i++; continue; }
+          if (ch === '"'){ inQuotes = !inQuotes; continue; }
+          if (ch === ',' && !inQuotes){ out.push(cur.trim()); cur=''; continue; }
+          cur += ch;
         }
-      }
+        out.push(cur.trim());
+        return out;
+      });
+    }
+
+    const isHttpUrl = (u) => /^https?:\/\//i.test(u || '');
+    const money = (n) => {
+      const v = String(n).replace(/\./g,'').replace(',','.');
+      const num = Number(v);
+      return isFinite(num) ? num.toLocaleString('es-AR',{ style:'currency', currency:'ARS', maximumFractionDigits:0 }) : (n || '');
     };
 
-    const UI = {
-      init(){
-        document.documentElement.setAttribute("data-theme", State.theme);
-        document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro";
-        Data.overrideFromQuery();
-        this.cats(); this.grid(); this.bind(); Cart.load(); this.checkoutSync();
-        const initial = Object.values(Catalog).reduce((a,b)=>a+(b?.length||0),0); toast("Catálogo: "+initial+" ítems");
-        Data.loadFromSheets();
-      },
-      bind(){
-        document.getElementById("themeToggle").onclick = ()=>{ State.theme = State.theme==="dark" ? "light":"dark"; localStorage.setItem("shop_theme", State.theme); document.documentElement.setAttribute("data-theme", State.theme); document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro"; };
-        document.getElementById("q").oninput = e => { State.q = e.target.value.toLowerCase(); this.grid(); };
-        document.getElementById("sort").onchange = e => { State.sort = e.target.value; this.grid(); };
-        document.getElementById("apply").onclick = ()=>{ State.minp = document.getElementById("minp").value; State.maxp = document.getElementById("maxp").value; this.grid(); };
-        document.getElementById("clear").onclick = ()=>{ State.minp=""; State.maxp=""; document.getElementById("minp").value=""; document.getElementById("maxp").value=""; this.grid(); };
-        document.getElementById("f_mode").onchange = ()=> this.checkoutSync();
-        /* zona eliminada */
-        document.getElementById("f_payment").onchange = ()=> this.checkoutSync();
-        document.getElementById("f_coupon").oninput = ()=> this.checkoutSync();
-                        document.getElementById("btnConfirm").onclick = ()=> this.confirmOrder();
-        document.getElementById("btnClearCartBar").onclick = ()=>{ if(confirm("¿Vaciar todo el carrito?")){ Cart.clear(); toast("Carrito vacío"); } };
-        document.getElementById("btnSync").onclick = ()=> Data.loadFromSheets();
+    function skeletonCard(){
+      return html`
+        <article class="card">
+          <div class="media skeleton"></div>
+          <div class="content">
+            <div class="skeleton" style="height:16px; width:70%; border-radius:8px;"></div>
+            <div class="skeleton" style="height:14px; width:45%; border-radius:8px; margin-top:8px;"></div>
+            <div class="skeleton" style="height:18px; width:35%; border-radius:8px; margin-top:12px;"></div>
+          </div>
+        </article>
+      `;
+    }
 
-        document.getElementById("btnConnectSheets").onclick = ()=>{
-          const current = localStorage.getItem("sheets_gviz_url") || "";
-          const val = prompt("Pegá aquí el enlace GVIZ de tu Google Sheets (formato: https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:json&sheet=catalog)", current);
-          if(val && val.startsWith("https://")){
-            localStorage.setItem("sheets_gviz_url", val);
-            SHEETS_GVIZ_URL = val;
-            toast("Sheets conectado. Actualizando catálogo…");
-            Data.loadFromSheets();
-          } else if(val !== null) {
-            toast("Enlace inválido. No se guardó.");
+    function cardItem(row){
+      const nombre       = row[COL.nombre] || 'Producto';
+      const presentacion = row[COL.presentacion] || '';
+      const precio       = row[COL.precio] || '';
+      const imgUrl       = row[COL.imagen];
+      const link         = row[COL.link];
+
+      const safeImg = isHttpUrl(imgUrl) ? imgUrl : 'https://via.placeholder.com/640x420?text=Sin+Imagen';
+      const hasLink = isHttpUrl(link);
+
+      const media = html`
+        <div class="media">
+          ${hasLink
+            ? html`<a href="${link}" target="_blank" rel="noopener noreferrer"><img src="${safeImg}" alt="${nombre}" loading="lazy"></a>`
+            : html`<img src="${safeImg}" alt="${nombre}" loading="lazy">`
           }
-        };
-        // Si no hay URL configurada, ofrecer conectarla al iniciar
-        if(!SHEETS_GVIZ_URL){
-          setTimeout(()=>{
-            document.getElementById("btnConnectSheets").click();
-          }, 600);
+        </div>
+      `;
+      const title = html`<div class="title">${nombre}</div>`;
+      const sub   = presentacion ? html`<div class="subtitle">${presentacion}</div>` : '';
+      const prc   = precio ? html`<div class="price">${money(precio)}</div>` : '';
+
+      const action = hasLink
+        ? html`<a class="link" href="${link}" target="_blank" rel="noopener noreferrer">
+                 <i class="fa-solid fa-cart-shopping"></i> Comprar
+               </a>`
+        : '';
+
+      return html`
+        <article class="card">
+          ${media}
+          <div class="content">
+            ${title}
+            ${sub}
+            ${prc}
+          </div>
+          ${action}
+        </article>
+      `;
+    }
+
+    function renderBySector(rows){
+      const host = $('#catalogo');
+      if (!host){ console.warn('No se encontró #catalogo'); return; }
+
+      // Agrupar por sector
+      const groups = rows.reduce((acc, r) => {
+        const k = r[COL.sector] || 'General';
+        (acc[k] ||= []).push(r);
+        return acc;
+      }, {});
+
+      host.innerHTML = Object.entries(groups).map(([sector, arr]) => html`
+        <section>
+          <h2>${sector}</h2>
+          <div class="grid">
+            ${arr.map(cardItem).join('')}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function maybeHasHeader(row0){
+      const a = (row0?.[COL.nombre] || '').toLowerCase();
+      return a.includes('producto') || a.includes('nombre');
+    }
+
+    async function loadCatalog(force = false){
+      const status = $('#status');
+      const host   = $('#catalogo');
+
+      // Loader
+      status.innerHTML = `<i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…`;
+      host.innerHTML = `<div class="grid">${Array.from({length:8}).map(skeletonCard).join('')}</div>`;
+
+      try{
+        const bust = force ? `&v=${Date.now()}` : '';
+        const res = await fetch(CSV_URL + bust, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const rows = parseCSV(text);
+
+        const body = maybeHasHeader(rows[0]) ? rows.slice(1) : rows;
+        const clean = body.filter(r => (r[COL.nombre] || '').trim().length);
+
+        if (!clean.length) {
+          status.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> No hay filas válidas (verificá columnas B/C/D/F y permisos del Sheet).`;
+          host.innerHTML = '';
+          return;
         }
 
-      },
-      cats(){
-        const el = document.getElementById("cats"); el.innerHTML="";
-        Categories.forEach(c=>{ const b=document.createElement("button"); b.className=""+(State.cat===c.id?"active":""); b.innerHTML=`<i class="fa-solid ${c.icon}"></i> ${c.name}`; b.onclick=()=>{ State.cat=c.id; this.cats(); this.grid(); }; el.appendChild(b); });
-      },
-      productsOf(c){ return Catalog[c.id]||[] },
-      grid(){
-        const wrap = document.getElementById("grid"); wrap.innerHTML="";
-        const cats = State.q ? Categories : Categories.filter(c=>c.id===State.cat);
-        cats.forEach(c=>{
-          const list = this.productsOf(c)
-            .filter(p=> !State.q || p.name.toLowerCase().includes(State.q))
-            .filter(p=> (State.minp? p.price>=parseInt(State.minp,10):true) && (State.maxp? p.price<=parseInt(State.maxp,10):true))
-            .slice();
-
-          if(State.sort==="price_asc") list.sort((a,b)=>a.price-b.price);
-          else if(State.sort==="price_desc") list.sort((a,b)=>b.price-a.price);
-          else if(State.sort==="alpha") list.sort((a,b)=> a.name.localeCompare(b.name,'es'));
-
-          list.forEach(p=>{
-            const key = slug(p.name);
-            const card = document.createElement("div"); card.className="card";
-            const th = document.createElement("div"); th.className="thumb";
-            if(p.image){ const img=document.createElement("img"); img.alt=p.name; img.src=p.image; img.onerror = ()=> { img.src = PLACEHOLDER_IMG }; th.appendChild(img); }
-            else{ const img=document.createElement("img"); img.alt=p.name; img.src=PLACEHOLDER_IMG; th.appendChild(img); }
-            card.appendChild(th);
-            const info = document.createElement("div"); info.className="info";
-            info.innerHTML = `<div class="name">${p.name}</div><div class="unit">${p.unit}</div><div class="price">${fmt(p.price)}</div>`;
-            const acts = document.createElement("div"); acts.className="actions";
-            acts.innerHTML = `<div class="qty">
-                <div class="icon" data-act="dec" data-key="${key}"><i class="fa-solid fa-minus"></i></div>
-                <input class="field" style="width:60px;text-align:center" value="${Cart.data[key]?.qty||0}" data-act="set" data-key="${key}"/>
-                <div class="icon" data-act="inc" data-key="${key}"><i class="fa-solid fa-plus"></i></div>
-              </div>`;
-            acts.querySelector('[data-act="inc"]').onclick = () => Cart.add(p);
-            acts.querySelector('[data-act="dec"]').onclick = () => Cart.dec(key);
-            acts.querySelector('[data-act="set"]').onchange = (e)=>{ const q=Math.max(0,parseInt(e.target.value||"0",10)); if(!Cart.data[key] && q>0) Cart.data[key]={...p,qty:0}; Cart.set(key,q); };
-            info.appendChild(acts); card.appendChild(info); wrap.appendChild(card);
-          });
-        });
-        this.sync();
-      },
-      sync(){
-        const count = Cart.count(); document.getElementById("cartCount").textContent = `${count} ${count===1?'ítem':'ítems'}`;
-        document.getElementById("cartTotal").textContent = fmt(Cart.subtotal());
-        document.querySelectorAll('input[data-act="set"][data-key]').forEach(inp=>{ const key = inp.getAttribute("data-key"); inp.value = Cart.data[key]?.qty || 0; });
-        this.checkoutSync();
-      },
-      shippingFee(){
-        return 0; // zona/envío deshabilitados
-      },
-      discounts(sub){ 
-        const coupon = (document.getElementById("f_coupon").value||"").trim().toUpperCase();
-        const payment = document.getElementById("f_payment").value;
-        let disc = 0;
-        if(coupon==="BIENVENIDO10") disc += Math.round(sub*0.10);
-        
-        return disc;
-      },
-      checkoutSync(){
-        const mode = document.getElementById("f_mode").value;
-        document.getElementById("rowAddress").style.display = (mode==="delivery") ? "grid":"none";
-        const sub = Cart.subtotal();
-        const ship = 0; // envío deshabilitado
-        const disc = this.discounts(sub);
-        document.getElementById("sum_sub").textContent = fmt(sub);
-        if(document.getElementById("sum_ship")){ document.getElementById("sum_ship").textContent = fmt(ship); }
-        document.getElementById("sum_disc").textContent = "-" + fmt(disc);
-        document.getElementById("sum_total").textContent = fmt(Math.max(0, sub + ship - disc));
-
-        const pay = document.getElementById("f_payment").value;
-        const hints = document.getElementById("payHints");
-        if(pay==="transferencia") hints.textContent = "Transferencia: te enviaremos alias/CBU al confirmar.";
-        else if(pay==="mercadopago") hints.textContent = "Mercado Pago: te enviaremos un link de pago al confirmar.";
-        else hints.textContent = "Efectivo: recordá tener cambio exacto.";
-      },
-      confirmOrder(){
-        if(Cart.count()===0){ toast("Carrito vacío"); return; }
-        const order = {
-          items: Cart.items(),
-          customer: {
-            name: document.getElementById("f_name").value.trim(),
-            email: document.getElementById("f_email").value.trim(),
-            phone: document.getElementById("f_phone").value.trim(),
-            mode: document.getElementById("f_mode").value,
-            address: document.getElementById("f_address").value.trim(),
-            
-            payment: document.getElementById("f_payment").value,
-            coupon: (document.getElementById("f_coupon").value||"").trim().toUpperCase()
-          },
-          totals: {
-            subtotal: Cart.subtotal(),
-            shipping: this.shippingFee(),
-            discount: this.discounts(Cart.subtotal()),
-            total: Math.max(0, Cart.subtotal() + this.shippingFee() - this.discounts(Cart.subtotal()))
-          },
-          createdAt: new Date().toISOString()
-        };
-        try{ localStorage.setItem("shop_last_order", JSON.stringify(order)) }catch{}
-        document.getElementById("orderOk").style.display = "block";
-        toast("Pedido confirmado");
-
-        const phone = WHATSAPP_NUMBER.replace(/\D/g,"");
-        const lines = order.items.map(it => `• ${it.name} x${it.qty} – ${fmt(it.price*it.qty)}`);
-        const info = [
-          `👤 ${order.customer.name||"Cliente"}`,
-          order.customer.phone ? `📞 ${order.customer.phone}` : "",
-          order.customer.mode==="delivery" ? `🚚 Delivery` : "🏬 Retiro en local",
-          order.customer.address ? `📍 ${order.customer.address}` : "",
-                    `💳 Pago: ${order.customer.payment}${order.customer.coupon? " • Cupón: "+order.customer.coupon : ""}`
-        ].filter(Boolean).join("\n");
-        const msg = [
-          `*Pedido La Peruana*`,
-          info,
-          `\n*Detalle:*`,
-          lines.join("\n"),
-          `\nSubtotal: ${fmt(order.totals.subtotal)}`,
-          
-          order.totals.discount>0 ? `Descuentos: -${fmt(order.totals.discount)}` : null,
-          `*Total:* ${fmt(order.totals.total)}`
-        ].filter(Boolean).join("\n");
-        const encoded = encodeURIComponent(msg);
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const urlDesktop = `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
-        const urlMobile  = `https://wa.me/${phone}?text=${encoded}`;
-        const a = document.createElement("a"); a.href = isMobile ? urlMobile : urlDesktop; a.target="_blank"; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
+        renderBySector(clean);
+        status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Catálogo actualizado — ${new Date().toLocaleString('es-AR')}`;
+      } catch (err){
+        console.error(err);
+        status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error cargando catálogo: ${String(err.message || err)}`;
+        host.innerHTML = `<div style="color:#ef4444">Verificá:
+          <ul>
+            <li>Que la planilla sea pública o “cualquiera con el enlace”.</li>
+            <li>Que el <b>ID</b> y <b>gid</b> sean correctos.</li>
+            <li>Que la columna <b>F</b> tenga URLs de imagen válidas.</li>
+          </ul></div>`;
       }
-    };
+    }
 
-    UI.init();
+    // ========= THEME / UX =========
+    function toggleTheme(){
+      const root = document.documentElement;
+      const cur  = root.getAttribute('data-theme') || 'dark';
+      const nxt  = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nxt);
+      try{ localStorage.setItem('lp-theme', nxt) }catch{}
+    }
+    function restoreTheme(){
+      let t = 'dark';
+      try{ t = localStorage.getItem('lp-theme') || t }catch{}
+      document.documentElement.setAttribute('data-theme', t);
+    }
+
+    // ========= INIT =========
+    document.addEventListener('DOMContentLoaded', () => {
+      restoreTheme();
+      $('#themeBtn')?.addEventListener('click', toggleTheme);
+      $('#reloadBtn')?.addEventListener('click', () => loadCatalog(true));
+      loadCatalog(false);
+    });
+  })();
   </script>
 </body>
 </html>
