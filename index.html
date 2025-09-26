@@ -30,34 +30,54 @@
     .logo{
       display:flex; align-items:center; gap:10px;
       font-weight:800; letter-spacing:.3px;
-/* Tamaño controlado y responsive */
-.logo img{
-  height: 36px;       /* cambiá a 48px si querés más grande */
-  width: auto;
-  object-fit: contain;
-  border-radius: 8px; /* quitá si no lo querés redondeado */
-}
+    } /* <-- ¡ESTA LLAVE FALTABA! */
 
-/* Si tu logo es oscuro y en tema oscuro “se pierde”, dale fondo sutil */
-.logo img{
-  background: color-mix(in oklab, var(--card) 85%, transparent);
-  padding: 4px;
-}
-
-/* Si el logo es muy claro y en tema claro no contrasta, agregá borde/sombra */
-[data-theme="light"] .logo img{
-  box-shadow: 0 0 0 1px rgba(0,0,0,.08);
-}
-
+    /* Botonera / layout header */
+    .grow{ flex:1 }
+    .toolbar{ display:flex; gap:8px; align-items:center }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      background: var(--card); color: var(--text);
+      border:1px solid rgba(255,255,255,.08);
+      padding:8px 12px; border-radius:12px; cursor:pointer;
+      box-shadow: var(--shadow);
+    }
     .btn:hover{ transform: translateY(-1px); }
+
+    /* Tamaño controlado y responsive del logo */
+    .logo img{
+      height: 36px; /* cambiá a 48px si querés más grande */
+      width: auto;
+      object-fit: contain;
+      border-radius: 8px; /* quitá si no lo querés redondeado */
+      background: color-mix(in oklab, var(--card) 85%, transparent);
+      padding: 4px;
+    }
+    /* Mejor contraste del logo en tema claro */
+    [data-theme="light"] .logo img{
+      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+    }
+
     main{ max-width:1200px; margin:22px auto; padding: 0 16px 40px }
     #status{
       margin:8px 0 14px; color:var(--muted); font-size:.95rem;
       display:flex; align-items:center; gap:8px;
     }
+
+    /* Barra de sectores (chips) */
+    .sectors-bar{
+      display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px;
+    }
+    .sector-chip{
+      padding:6px 10px; border-radius:999px; cursor:pointer; user-select:none;
+      border:1px solid rgba(255,255,255,.12); background:var(--card); color:var(--text);
+      font-size:.9rem;
+    }
+    .sector-chip.active{ outline:2px solid var(--primary); }
+
     .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px }
     section{ margin: 18px 0 28px }
-    section h2{ margin: 6px 4px 12px; font-size:1.05rem; color:var(--muted) }
+    section h2{ margin: 6px 4px 12px; font-size:1.05rem; color:var(--text); opacity:.85 }
 
     article.card{
       background:var(--card); color:var(--text); border-radius: var(--radius);
@@ -105,200 +125,254 @@
   </div>
 </header>
 
-  <main>
-    <div id="status"><i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…</div>
-   <!-- Barra de sectores -->
-<div id="sectorsBar" class="sectors-bar" aria-label="Filtrar por sector"></div>
-    <div id="catalogo"></div>
-  </main>
+<main>
+  <div id="status"><i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…</div>
+  <!-- Barra de sectores -->
+  <div id="sectorsBar" class="sectors-bar" aria-label="Filtrar por sector"></div>
+  <div id="catalogo"></div>
+</main>
 
-  <script>
-  ;(() => {
-    // ========= CONFIG =========
-    const SHEET_ID = '1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem'; // Tu Google Sheet
-    const GID      = '1645617335';                         // Pestaña del catálogo
-    const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+<script>
+;(() => {
+  // ========= CONFIG =========
+  const SHEET_ID = '1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem'; // Tu Google Sheet
+  const GID      = '1645617335';                         // Pestaña del catálogo
+  const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-    // Columnas (0-based)
-    // A=Sector, B=Producto, C=Presentación, D=Precio, E=(libre), F=Imagen(URL), G=Link (opcional)
-    const COL = {
-      sector: 0,
-      nombre: 1,
-      presentacion: 2,
-      precio: 3,
-      imagen: 5,
-      link: 6
-    };
+  // Columnas (0-based)
+  // A=Sector, B=Producto, C=Presentación, D=Precio, E=(libre), F=Imagen(URL), G=Link (opcional)
+  const COL = {
+    sector: 0,
+    nombre: 1,
+    presentacion: 2,
+    precio: 3,
+    imagen: 5,
+    link: 6
+  };
 
-    // ========= HELPERS =========
-    const $ = (sel, ctx = document) => ctx.querySelector(sel);
-    const html = (strings, ...vals) => strings.reduce((a,s,i)=> a + s + (vals[i] ?? ''), '');
+  // ========= HELPERS =========
+  const $ = (sel, ctx = document) => ctx.querySelector(sel);
+  const html = (strings, ...vals) => strings.reduce((a,s,i)=> a + s + (vals[i] ?? ''), '');
 
-    function parseCSV(str) {
-      // Parser robusto simple (comillas y comas)
-      const lines = str.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
-      return lines.map(line => {
-        const out = [];
-        let cur = '', inQuotes = false;
-        for (let i=0; i<line.length; i++){
-          const ch = line[i], nx = line[i+1];
-          if (ch === '"' && inQuotes && nx === '"'){ cur+='"'; i++; continue; }
-          if (ch === '"'){ inQuotes = !inQuotes; continue; }
-          if (ch === ',' && !inQuotes){ out.push(cur.trim()); cur=''; continue; }
-          cur += ch;
-        }
-        out.push(cur.trim());
-        return out;
-      });
-    }
+  function parseCSV(str) {
+    // Parser robusto simple (comillas y comas)
+    const lines = str.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
+    return lines.map(line => {
+      const out = [];
+      let cur = '', inQuotes = false;
+      for (let i=0; i<line.length; i++){
+        const ch = line[i], nx = line[i+1];
+        if (ch === '"' && inQuotes && nx === '"'){ cur+='"'; i++; continue; }
+        if (ch === '"'){ inQuotes = !inQuotes; continue; }
+        if (ch === ',' && !inQuotes){ out.push(cur.trim()); cur=''; continue; }
+        cur += ch;
+      }
+      out.push(cur.trim());
+      return out;
+    });
+  }
 
-    const isHttpUrl = (u) => /^https?:\/\//i.test(u || '');
-    const money = (n) => {
-      const v = String(n).replace(/\./g,'').replace(',','.');
-      const num = Number(v);
-      return isFinite(num) ? num.toLocaleString('es-AR',{ style:'currency', currency:'ARS', maximumFractionDigits:0 }) : (n || '');
-    };
+  const isHttpUrl = (u) => /^https?:\/\//i.test(u || '');
+  const money = (n) => {
+    const v = String(n).replace(/\./g,'').replace(',','.');
+    const num = Number(v);
+    return isFinite(num) ? num.toLocaleString('es-AR',{ style:'currency', currency:'ARS', maximumFractionDigits:0 }) : (n || '');
+  };
 
-    function skeletonCard(){
-      return html`
-        <article class="card">
-          <div class="media skeleton"></div>
-          <div class="content">
-            <div class="skeleton" style="height:16px; width:70%; border-radius:8px;"></div>
-            <div class="skeleton" style="height:14px; width:45%; border-radius:8px; margin-top:8px;"></div>
-            <div class="skeleton" style="height:18px; width:35%; border-radius:8px; margin-top:12px;"></div>
-          </div>
-        </article>
-      `;
-    }
-
-    function cardItem(row){
-      const nombre       = row[COL.nombre] || 'Producto';
-      const presentacion = row[COL.presentacion] || '';
-      const precio       = row[COL.precio] || '';
-      const imgUrl       = row[COL.imagen];
-      const link         = row[COL.link];
-
-      const safeImg = isHttpUrl(imgUrl) ? imgUrl : 'https://via.placeholder.com/640x420?text=Sin+Imagen';
-      const hasLink = isHttpUrl(link);
-
-      const media = html`
-        <div class="media">
-          ${hasLink
-            ? html`<a href="${link}" target="_blank" rel="noopener noreferrer"><img src="${safeImg}" alt="${nombre}" loading="lazy"></a>`
-            : html`<img src="${safeImg}" alt="${nombre}" loading="lazy">`
-          }
+  function skeletonCard(){
+    return html`
+      <article class="card">
+        <div class="media skeleton"></div>
+        <div class="content">
+          <div class="skeleton" style="height:16px; width:70%; border-radius:8px;"></div>
+          <div class="skeleton" style="height:14px; width:45%; border-radius:8px; margin-top:8px;"></div>
+          <div class="skeleton" style="height:18px; width:35%; border-radius:8px; margin-top:12px;"></div>
         </div>
-      `;
-      const title = html`<div class="title">${nombre}</div>`;
-      const sub   = presentacion ? html`<div class="subtitle">${presentacion}</div>` : '';
-      const prc   = precio ? html`<div class="price">${money(precio)}</div>` : '';
+      </article>
+    `;
+  }
 
-      const action = hasLink
-        ? html`<a class="link" href="${link}" target="_blank" rel="noopener noreferrer">
-                 <i class="fa-solid fa-cart-shopping"></i> Comprar
-               </a>`
-        : '';
+  function cardItem(row){
+    const nombre       = row[COL.nombre] || 'Producto';
+    const presentacion = row[COL.presentacion] || '';
+    const precio       = row[COL.precio] || '';
+    const imgUrl       = row[COL.imagen];
+    const link         = row[COL.link];
 
-      return html`
-        <article class="card">
-          ${media}
-          <div class="content">
-            ${title}
-            ${sub}
-            ${prc}
-          </div>
-          ${action}
-        </article>
-      `;
-    }
+    const safeImg = isHttpUrl(imgUrl) ? imgUrl : 'https://via.placeholder.com/640x420?text=Sin+Imagen';
+    const hasLink = isHttpUrl(link);
 
-    function renderBySector(rows){
-      const host = $('#catalogo');
-      if (!host){ console.warn('No se encontró #catalogo'); return; }
+    const media = html`
+      <div class="media">
+        ${hasLink
+          ? html`<a href="${link}" target="_blank" rel="noopener noreferrer"><img src="${safeImg}" alt="${nombre}" loading="lazy"></a>`
+          : html`<img src="${safeImg}" alt="${nombre}" loading="lazy">`
+        }
+      </div>
+    `;
+    const title = html`<div class="title">${nombre}</div>`;
+    const sub   = presentacion ? html`<div class="subtitle">${presentacion}</div>` : '';
+    const prc   = precio ? html`<div class="price">${money(precio)}</div>` : '';
 
-      // Agrupar por sector
-      const groups = rows.reduce((acc, r) => {
-        const k = r[COL.sector] || 'General';
-        (acc[k] ||= []).push(r);
-        return acc;
-      }, {});
+    const action = hasLink
+      ? html`<a class="link" href="${link}" target="_blank" rel="noopener noreferrer">
+               <i class="fa-solid fa-cart-shopping"></i> Comprar
+             </a>`
+      : '';
 
-      host.innerHTML = Object.entries(groups).map(([sector, arr]) => html`
+    return html`
+      <article class="card">
+        ${media}
+        <div class="content">
+          ${title}
+          ${sub}
+          ${prc}
+        </div>
+        ${action}
+      </article>
+    `;
+  }
+
+  // Normalización de sector + barra de filtros
+  const normSector = (s) => {
+    if (!s) return 'General';
+    const x = String(s).normalize('NFKC').trim();
+    return x.length ? x : 'General';
+  };
+
+  function buildSectorsBar(sectors, onSelect, active='Todos'){
+    const bar = $('#sectorsBar');
+    if (!bar) return;
+
+    const all = ['Todos', ...sectors];
+    bar.innerHTML = all.map(s => {
+      const isActive = active === s;
+      return `<button class="sector-chip ${isActive?'active':''}" data-sector="${s}">${s}</button>`;
+    }).join('');
+
+    bar.querySelectorAll('.sector-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        bar.querySelectorAll('.sector-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        onSelect(btn.dataset.sector);
+      });
+    });
+  }
+
+  function renderAll(groups, filter='Todos'){
+    const host = $('#catalogo');
+    if (!host) return;
+
+    const entries = Object.entries(groups).sort((a,b)=> a[0].localeCompare(b[0],'es'));
+    let out = '';
+
+    if (filter === 'Todos'){
+      out = entries.map(([sector, arr]) => `
         <section>
           <h2>${sector}</h2>
-          <div class="grid">
-            ${arr.map(cardItem).join('')}
-          </div>
+          <div class="grid">${arr.map(cardItem).join('')}</div>
         </section>
       `).join('');
+    } else {
+      const arr = groups[filter] || [];
+      out = `
+        <section>
+          <h2>${filter}</h2>
+          <div class="grid">${arr.map(cardItem).join('')}</div>
+        </section>
+      `;
     }
+    host.innerHTML = out;
+  }
 
-    function maybeHasHeader(row0){
-      const a = (row0?.[COL.nombre] || '').toLowerCase();
-      return a.includes('producto') || a.includes('nombre');
-    }
+  function groupBySector(rows){
+    return rows.reduce((acc, r) => {
+      const k = normSector(r[COL.sector]);
+      (acc[k] ||= []).push(r);
+      return acc;
+    }, {});
+  }
 
-    async function loadCatalog(force = false){
-      const status = $('#status');
-      const host   = $('#catalogo');
+  function maybeHasHeader(row0){
+    const a = (row0?.[COL.nombre] || '').toLowerCase();
+    return a.includes('producto') || a.includes('nombre');
+  }
 
-      // Loader
-      status.innerHTML = `<i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…`;
-      host.innerHTML = `<div class="grid">${Array.from({length:8}).map(skeletonCard).join('')}</div>`;
+  async function loadCatalog(force = false){
+    const status = $('#status');
+    const host   = $('#catalogo');
 
-      try{
-        const bust = force ? `&v=${Date.now()}` : '';
-        const res = await fetch(CSV_URL + bust, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        const rows = parseCSV(text);
+    status.innerHTML = `<i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…`;
+    host.innerHTML = `<div class="grid">${Array.from({length:8}).map(skeletonCard).join('')}</div>`;
 
-        const body = maybeHasHeader(rows[0]) ? rows.slice(1) : rows;
-        const clean = body.filter(r => (r[COL.nombre] || '').trim().length);
+    try{
+      const bust = (CSV_URL.includes('?') ? '&' : '?') + 'v=' + Date.now(); // anti-cache
+      const res = await fetch(CSV_URL + bust, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
 
-        if (!clean.length) {
-          status.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> No hay filas válidas (verificá columnas B/C/D/F y permisos del Sheet).`;
-          host.innerHTML = '';
-          return;
-        }
-
-        renderBySector(clean);
-        status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Catálogo actualizado — ${new Date().toLocaleString('es-AR')}`;
-      } catch (err){
-        console.error(err);
-        status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error cargando catálogo: ${String(err.message || err)}`;
-        host.innerHTML = `<div style="color:#ef4444">Verificá:
-          <ul>
-            <li>Que la planilla sea pública o “cualquiera con el enlace”.</li>
-            <li>Que el <b>ID</b> y <b>gid</b> sean correctos.</li>
-            <li>Que la columna <b>F</b> tenga URLs de imagen válidas.</li>
-          </ul></div>`;
+      // Si vino HTML (no público), avisamos
+      if (/<\s*html[\s>]/i.test(text)){
+        status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> La planilla no es pública. Cambiá a "Cualquiera con el enlace (Lector)".`;
+        host.innerHTML = '';
+        return;
       }
-    }
 
-    // ========= THEME / UX =========
-    function toggleTheme(){
-      const root = document.documentElement;
-      const cur  = root.getAttribute('data-theme') || 'dark';
-      const nxt  = cur === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', nxt);
-      try{ localStorage.setItem('lp-theme', nxt) }catch{}
-    }
-    function restoreTheme(){
-      let t = 'dark';
-      try{ t = localStorage.getItem('lp-theme') || t }catch{}
-      document.documentElement.setAttribute('data-theme', t);
-    }
+      const rows = parseCSV(text);
+      const body = maybeHasHeader(rows[0]) ? rows.slice(1) : rows;
 
-    // ========= INIT =========
-    document.addEventListener('DOMContentLoaded', () => {
-      restoreTheme();
-      $('#themeBtn')?.addEventListener('click', toggleTheme);
-      $('#reloadBtn')?.addEventListener('click', () => loadCatalog(true));
-      loadCatalog(false);
-    });
-  })();
-  </script>
+      const clean = body
+        .filter(r => (r[COL.nombre] || '').trim().length)
+        .map(r => { r[COL.sector] = normSector(r[COL.sector]); return r; });
+
+      if (!clean.length) {
+        status.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> No hay filas válidas (verificá columnas B/C/D/F y permisos del Sheet).`;
+        host.innerHTML = '';
+        return;
+      }
+
+      const groups = groupBySector(clean);
+      const sectors = Object.keys(groups).sort((a,b)=> a.localeCompare(b,'es'));
+
+      // Barra de sectores + render
+      buildSectorsBar(sectors, (selected) => renderAll(groups, selected), 'Todos');
+      renderAll(groups, 'Todos');
+
+      status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Catálogo actualizado — ${new Date().toLocaleString('es-AR')}`;
+    } catch (err){
+      console.error(err);
+      status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error cargando catálogo: ${String(err.message || err)}`;
+      host.innerHTML = `<div style="color:#ef4444">Verificá:
+        <ul>
+          <li>Que la planilla sea pública o “cualquiera con el enlace”.</li>
+          <li>Que el <b>ID</b> y <b>gid</b> sean correctos.</li>
+          <li>Que la columna <b>F</b> tenga URLs de imagen válidas.</li>
+        </ul></div>`;
+    }
+  }
+
+  // ========= THEME / UX =========
+  function toggleTheme(){
+    const root = document.documentElement;
+    const cur  = root.getAttribute('data-theme') || 'dark';
+    const nxt  = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nxt);
+    try{ localStorage.setItem('lp-theme', nxt) }catch{}
+  }
+  function restoreTheme(){
+    let t = 'dark';
+    try{ t = localStorage.getItem('lp-theme') || t }catch{}
+    document.documentElement.setAttribute('data-theme', t);
+  }
+
+  // ========= INIT =========
+  document.addEventListener('DOMContentLoaded', () => {
+    restoreTheme();
+    $('#themeBtn')?.addEventListener('click', toggleTheme);
+    $('#reloadBtn')?.addEventListener('click', () => loadCatalog(true));
+    loadCatalog(false);
+  });
+})();
+</script>
 </body>
 </html>
