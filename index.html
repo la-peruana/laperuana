@@ -1,166 +1,70 @@
-<!DOCTYPE html>
-<html lang="es" data-theme="dark">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>La Peruana — Tienda Online</title>
-  <meta name="description" content="E-commerce sin backend — La Peruana" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --text:#e2e8f0; --muted:#94a3b8;
-      --primary:#22c55e; --primary-600:#16a34a;
-      --shadow:0 10px 30px rgba(0,0,0,.30);
-      --radius:18px;
-    }
-    [data-theme="light"]{
-      --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --muted:#475569;
-    }
-    *{ box-sizing:border-box }
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    header{
-      position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
-      background: color-mix(in oklab, var(--bg) 70%, transparent);
-      display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .logo{
-      display:flex; align-items:center; gap:10px;
-      font-weight:800; letter-spacing:.3px;
-    } /* <-- ¡ESTA LLAVE FALTABA! */
-
-    /* Botonera / layout header */
-    .grow{ flex:1 }
-    .toolbar{ display:flex; gap:8px; align-items:center }
-    .btn{
-      display:inline-flex; align-items:center; gap:8px;
-      background: var(--card); color: var(--text);
-      border:1px solid rgba(255,255,255,.08);
-      padding:8px 12px; border-radius:12px; cursor:pointer;
-      box-shadow: var(--shadow);
-    }
-    .btn:hover{ transform: translateY(-1px); }
-
-    /* Tamaño controlado y responsive del logo */
-    .logo img{
-      height: 36px; /* cambiá a 48px si querés más grande */
-      width: auto;
-      object-fit: contain;
-      border-radius: 8px; /* quitá si no lo querés redondeado */
-      background: color-mix(in oklab, var(--card) 85%, transparent);
-      padding: 4px;
-    }
-    /* Mejor contraste del logo en tema claro */
-    [data-theme="light"] .logo img{
-      box-shadow: 0 0 0 1px rgba(0,0,0,.08);
-    }
-
-    main{ max-width:1200px; margin:22px auto; padding: 0 16px 40px }
-    #status{
-      margin:8px 0 14px; color:var(--muted); font-size:.95rem;
-      display:flex; align-items:center; gap:8px;
-    }
-
-    /* Barra de sectores (chips) */
-    .sectors-bar{
-      display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px;
-    }
-    .sector-chip{
-      padding:6px 10px; border-radius:999px; cursor:pointer; user-select:none;
-      border:1px solid rgba(255,255,255,.12); background:var(--card); color:var(--text);
-      font-size:.9rem;
-    }
-    .sector-chip.active{ outline:2px solid var(--primary); }
-
-    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px }
-    section{ margin: 18px 0 28px }
-    section h2{ margin: 6px 4px 12px; font-size:1.05rem; color:var(--text); opacity:.85 }
-
-    article.card{
-      background:var(--card); color:var(--text); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow:hidden; border:1px solid rgba(255,255,255,.06);
-      display:flex; flex-direction:column; min-height: 320px;
-    }
-    .media{ width:100%; height:200px; background:#0b1220; overflow:hidden }
-    .media img{ width:100%; height:100%; object-fit:cover; display:block }
-    .content{ padding:12px }
-    .title{ margin:4px 0 2px; font-size:1rem; font-weight:700; line-height:1.25 }
-    .subtitle{ color:var(--muted); font-size:.9rem }
-    .price{ margin-top:8px; font-weight:800 }
-    .link{
-      margin: 10px 12px 14px; display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px; border-radius:12px; background: color-mix(in oklab, var(--primary) 86%, black 0%);
-      color:#052e14; font-weight:700; text-decoration:none; justify-content:center;
-    }
-    .link:hover{ filter:brightness(.95) }
-    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0 }
-
-    /* Skeleton loader */
-    .skeleton{
-      animation: pulse 1.2s infinite ease-in-out;
-      background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.08), rgba(255,255,255,.04));
-      background-size: 200% 100%;
-    }
-    @keyframes pulse{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  </style>
-</head>
-
-<body>
-<header>
-  <div class="logo">
-    <img id="lpLogo" src="./assets/la-peruana-logo.png" alt="La Peruana" />
-    <div>La Peruana — Tienda Online</div>
-  </div>
-  <div class="grow"></div>
-  <div class="toolbar">
-    <button id="themeBtn" class="btn" type="button" title="Cambiar tema">
-      <i class="fa-solid fa-circle-half-stroke"></i> Tema
-    </button>
-    <button id="reloadBtn" class="btn" type="button" title="Recargar catálogo">
-      <i class="fa-solid fa-rotate-right"></i> Recargar
-    </button>
-  </div>
-</header>
-
-<main>
-  <div id="status"><i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…</div>
-  <!-- Barra de sectores -->
-  <div id="sectorsBar" class="sectors-bar" aria-label="Filtrar por sector"></div>
-  <div id="catalogo"></div>
-</main>
-
 <script>
 ;(() => {
   // ========= CONFIG =========
-  const SHEET_ID = '1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem'; // Tu Google Sheet
-  const GID      = '1645617335';                         // Pestaña del catálogo
+  const SHEET_ID = '1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem';
+  const GID      = '1645617335';
   const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-  // Columnas (0-based)
-  // A=Sector, B=Producto, C=Presentación, D=Precio, E=(libre), F=Imagen(URL), G=Link (opcional)
-  const COL = {
-    sector: 0,
-    nombre: 1,
-    presentacion: 2,
-    precio: 3,
-    imagen: 5,
-    link: 6
-  };
+  // Columnas (0-based): A=Sector, B=Producto, C=Presentación, D=Precio, E=(libre), F=Imagen, G=Link
+  const COL = { sector:0, nombre:1, presentacion:2, precio:3, imagen:5, link:6 };
+
+  // Orden “de negocio” (ajustalo a tu gusto)
+  const ORDER = [
+    'Ofertas', 'Carnicería', 'Verdulería', 'Panadería', 'Pastelería', 'Rotisería',
+    'Almacén', 'Café', 'Bebidas', 'Lácteos', 'Quesos', 'Fiambres',
+    'Congelados', 'Higiene', 'Limpieza', 'Mascotas', 'Bazar', 'General'
+  ];
 
   // ========= HELPERS =========
-  const $ = (sel, ctx = document) => ctx.querySelector(sel);
-  const html = (strings, ...vals) => strings.reduce((a,s,i)=> a + s + (vals[i] ?? ''), '');
+  const $ = (sel, ctx=document) => ctx.querySelector(sel);
+  const html = (s, ...v) => s.reduce((a,b,i)=> a + b + (v[i] ?? ''), '');
 
-  function parseCSV(str) {
-    // Parser robusto simple (comillas y comas)
+  // Quita tildes/ruido para comparar
+  const fold = (s) => String(s||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu,' ') // no letras/números -> espacio
+    .trim();
+
+  // Canonización con sinónimos
+  function canonicalSector(raw){
+    const t = fold(raw);
+    if (!t) return 'General';
+
+    const RULES = [
+      [/\boferta(s)?\b/,                    'Ofertas'],
+      [/\b(carniceria|carne(s)?|vacio|asado|milanesa|pollo|aves?|cerdo|porcino)\b/, 'Carnicería'],
+      [/\b(verduleria|verdura(s)?|fruta(s)?|vegetal(es)?|hortaliza(s)?)\b/,        'Verdulería'],
+      [/\b(panaderia|pan(es)?|factura(s)?)\b/,                                     'Panadería'],
+      [/\b(pasteleria|reposteria|torta(s)?|postre(s)?)\b/,                          'Pastelería'],
+      [/\b(rotiseria|plato(s)? preparado(s)?|comida(s)? lista(s)?|cocina)\b/,       'Rotisería'],
+      [/\b(almacen|almacen|despensa|kiosco|kiosko|kiosk?o)\b/,                      'Almacén'],
+      [/\b(cafe|cafeteria|cafe(s)?)\b/,                                            'Café'],
+      [/\b(bebida(s)?|bodega|vino(s)?|cerveza(s)?|gaseosa(s)?)\b/,                  'Bebidas'],
+      [/\b(lacteos?|leche|yogur?|manteca|huevo(s)?)\b/,                             'Lácteos'],
+      [/\b(fiambre(s)?|fiambreria|fiambreria)\b/,                                   'Fiambres'],
+      [/\b(queso(s)?)\b/,                                                           'Quesos'],
+      [/\b(congelado(s)?|freezer|frozen)\b/,                                        'Congelados'],
+      [/\b(limpieza|hogar)\b/,                                                      'Limpieza'],
+      [/\b(higiene|perfumeria)\b/,                                                  'Higiene'],
+      [/\b(mascota(s)?|pet)\b/,                                                     'Mascotas'],
+      [/\b(bazar|hogar y bazar)\b/,                                                 'Bazar'],
+    ];
+    for (const [rx, label] of RULES){
+      if (rx.test(t)) return label;
+    }
+    // Si no matchea, devolvemos capitalizado “suave” del original
+    const orig = String(raw||'').trim();
+    if (!orig) return 'General';
+    return orig.charAt(0).toUpperCase() + orig.slice(1);
+  }
+
+  // Parser CSV simple (comillas + comas)
+  function parseCSV(str){
     const lines = str.replace(/\r/g,'').split('\n').filter(l => l.trim().length);
     return lines.map(line => {
-      const out = [];
-      let cur = '', inQuotes = false;
-      for (let i=0; i<line.length; i++){
+      const out = []; let cur = '', inQuotes = false;
+      for (let i=0;i<line.length;i++){
         const ch = line[i], nx = line[i+1];
         if (ch === '"' && inQuotes && nx === '"'){ cur+='"'; i++; continue; }
         if (ch === '"'){ inQuotes = !inQuotes; continue; }
@@ -176,7 +80,7 @@
   const money = (n) => {
     const v = String(n).replace(/\./g,'').replace(',','.');
     const num = Number(v);
-    return isFinite(num) ? num.toLocaleString('es-AR',{ style:'currency', currency:'ARS', maximumFractionDigits:0 }) : (n || '');
+    return isFinite(num) ? num.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}) : (n || '');
   };
 
   function skeletonCard(){
@@ -184,20 +88,19 @@
       <article class="card">
         <div class="media skeleton"></div>
         <div class="content">
-          <div class="skeleton" style="height:16px; width:70%; border-radius:8px;"></div>
-          <div class="skeleton" style="height:14px; width:45%; border-radius:8px; margin-top:8px;"></div>
-          <div class="skeleton" style="height:18px; width:35%; border-radius:8px; margin-top:12px;"></div>
+          <div class="skeleton" style="height:16px;width:70%;border-radius:8px;"></div>
+          <div class="skeleton" style="height:14px;width:45%;border-radius:8px;margin-top:8px;"></div>
+          <div class="skeleton" style="height:18px;width:35%;border-radius:8px;margin-top:12px;"></div>
         </div>
-      </article>
-    `;
+      </article>`;
   }
 
   function cardItem(row){
-    const nombre       = row[COL.nombre] || 'Producto';
+    const nombre = row[COL.nombre] || 'Producto';
     const presentacion = row[COL.presentacion] || '';
-    const precio       = row[COL.precio] || '';
-    const imgUrl       = row[COL.imagen];
-    const link         = row[COL.link];
+    const precio = row[COL.precio] || '';
+    const imgUrl = row[COL.imagen];
+    const link   = row[COL.link];
 
     const safeImg = isHttpUrl(imgUrl) ? imgUrl : 'https://via.placeholder.com/640x420?text=Sin+Imagen';
     const hasLink = isHttpUrl(link);
@@ -206,10 +109,8 @@
       <div class="media">
         ${hasLink
           ? html`<a href="${link}" target="_blank" rel="noopener noreferrer"><img src="${safeImg}" alt="${nombre}" loading="lazy"></a>`
-          : html`<img src="${safeImg}" alt="${nombre}" loading="lazy">`
-        }
-      </div>
-    `;
+          : html`<img src="${safeImg}" alt="${nombre}" loading="lazy">`}
+      </div>`;
     const title = html`<div class="title">${nombre}</div>`;
     const sub   = presentacion ? html`<div class="subtitle">${presentacion}</div>` : '';
     const prc   = precio ? html`<div class="price">${money(precio)}</div>` : '';
@@ -217,39 +118,25 @@
     const action = hasLink
       ? html`<a class="link" href="${link}" target="_blank" rel="noopener noreferrer">
                <i class="fa-solid fa-cart-shopping"></i> Comprar
-             </a>`
-      : '';
+             </a>` : '';
 
     return html`
       <article class="card">
         ${media}
-        <div class="content">
-          ${title}
-          ${sub}
-          ${prc}
-        </div>
+        <div class="content">${title}${sub}${prc}</div>
         ${action}
-      </article>
-    `;
+      </article>`;
   }
 
-  // Normalización de sector + barra de filtros
-  const normSector = (s) => {
-    if (!s) return 'General';
-    const x = String(s).normalize('NFKC').trim();
-    return x.length ? x : 'General';
-  };
-
+  // Barra de filtros
   function buildSectorsBar(sectors, onSelect, active='Todos'){
     const bar = $('#sectorsBar');
     if (!bar) return;
-
     const all = ['Todos', ...sectors];
     bar.innerHTML = all.map(s => {
       const isActive = active === s;
       return `<button class="sector-chip ${isActive?'active':''}" data-sector="${s}">${s}</button>`;
     }).join('');
-
     bar.querySelectorAll('.sector-chip').forEach(btn => {
       btn.addEventListener('click', () => {
         bar.querySelectorAll('.sector-chip').forEach(b => b.classList.remove('active'));
@@ -259,38 +146,46 @@
     });
   }
 
+  // Orden custom por ranking + alfabético de fallback
+  const orderIndex = (s) => {
+    const i = ORDER.indexOf(s);
+    return i === -1 ? 10_000 : i;
+  };
+  function sortSectors(arr){
+    return [...arr].sort((a,b) => {
+      const ia = orderIndex(a), ib = orderIndex(b);
+      return ia !== ib ? ia - ib : a.localeCompare(b,'es');
+    });
+  }
+
   function renderAll(groups, filter='Todos'){
     const host = $('#catalogo');
     if (!host) return;
 
-    const entries = Object.entries(groups).sort((a,b)=> a[0].localeCompare(b[0],'es'));
-    let out = '';
+    const entries = Object.entries(groups);
+    // Ordenamos sectores por ranking
+    entries.sort((a,b) => {
+      const sa = a[0], sb = b[0];
+      const ia = orderIndex(sa), ib = orderIndex(sb);
+      return ia !== ib ? ia - ib : sa.localeCompare(sb, 'es');
+    });
 
+    let out = '';
     if (filter === 'Todos'){
       out = entries.map(([sector, arr]) => `
         <section>
           <h2>${sector}</h2>
           <div class="grid">${arr.map(cardItem).join('')}</div>
-        </section>
-      `).join('');
+        </section>`).join('');
     } else {
       const arr = groups[filter] || [];
       out = `
         <section>
           <h2>${filter}</h2>
           <div class="grid">${arr.map(cardItem).join('')}</div>
-        </section>
-      `;
+        </section>`;
     }
     host.innerHTML = out;
-  }
-
-  function groupBySector(rows){
-    return rows.reduce((acc, r) => {
-      const k = normSector(r[COL.sector]);
-      (acc[k] ||= []).push(r);
-      return acc;
-    }, {});
   }
 
   function maybeHasHeader(row0){
@@ -298,20 +193,19 @@
     return a.includes('producto') || a.includes('nombre');
   }
 
-  async function loadCatalog(force = false){
+  async function loadCatalog(force=false){
     const status = $('#status');
     const host   = $('#catalogo');
-
     status.innerHTML = `<i class="fa-solid fa-cloud-arrow-down"></i> Cargando catálogo…`;
-    host.innerHTML = `<div class="grid">${Array.from({length:8}).map(skeletonCard).join('')}</div>`;
+    host.innerHTML   = `<div class="grid">${Array.from({length:8}).map(skeletonCard).join('')}</div>`;
 
     try{
       const bust = (CSV_URL.includes('?') ? '&' : '?') + 'v=' + Date.now(); // anti-cache
-      const res = await fetch(CSV_URL + bust, { cache: 'no-store' });
+      const res  = await fetch(CSV_URL + bust, { cache:'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
 
-      // Si vino HTML (no público), avisamos
+      // Si Google devolvió HTML (no público)
       if (/<\s*html[\s>]/i.test(text)){
         status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> La planilla no es pública. Cambiá a "Cualquiera con el enlace (Lector)".`;
         host.innerHTML = '';
@@ -321,33 +215,45 @@
       const rows = parseCSV(text);
       const body = maybeHasHeader(rows[0]) ? rows.slice(1) : rows;
 
+      // Normalizamos sector y filtramos filas válidas
+      const rawToCanon = new Map();
       const clean = body
         .filter(r => (r[COL.nombre] || '').trim().length)
-        .map(r => { r[COL.sector] = normSector(r[COL.sector]); return r; });
+        .map(r => {
+          const raw = r[COL.sector];
+          const canon = canonicalSector(raw);
+          rawToCanon.set(String(raw||'').trim(), canon);
+          r[COL.sector] = canon;
+          return r;
+        });
 
-      if (!clean.length) {
-        status.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> No hay filas válidas (verificá columnas B/C/D/F y permisos del Sheet).`;
+      if (!clean.length){
+        status.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> No hay filas válidas (revisá columnas A/B/C/D/F).`;
         host.innerHTML = '';
         return;
       }
 
-      const groups = groupBySector(clean);
-      const sectors = Object.keys(groups).sort((a,b)=> a.localeCompare(b,'es'));
+      // Agrupar
+      const groups = clean.reduce((acc, r) => {
+        (acc[r[COL.sector]] ||= []).push(r);
+        return acc;
+      }, {});
 
-      // Barra de sectores + render
+      // Sectores presentes y ordenados
+      const sectors = sortSectors(Object.keys(groups));
+
+      // Barra + render
       buildSectorsBar(sectors, (selected) => renderAll(groups, selected), 'Todos');
       renderAll(groups, 'Todos');
 
       status.innerHTML = `<i class="fa-solid fa-circle-check"></i> Catálogo actualizado — ${new Date().toLocaleString('es-AR')}`;
+
+      // Auditoría útil en consola
+      console.table([...rawToCanon.entries()].map(([raw, canon]) => ({RAW: raw || '(vacío)', CANONICO: canon})));
     } catch (err){
       console.error(err);
       status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error cargando catálogo: ${String(err.message || err)}`;
-      host.innerHTML = `<div style="color:#ef4444">Verificá:
-        <ul>
-          <li>Que la planilla sea pública o “cualquiera con el enlace”.</li>
-          <li>Que el <b>ID</b> y <b>gid</b> sean correctos.</li>
-          <li>Que la columna <b>F</b> tenga URLs de imagen válidas.</li>
-        </ul></div>`;
+      host.innerHTML = '';
     }
   }
 
@@ -374,5 +280,3 @@
   });
 })();
 </script>
-</body>
-</html>
