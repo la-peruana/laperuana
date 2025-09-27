@@ -56,7 +56,7 @@
     .toast{position:fixed;right:12px;bottom:12px;background:#052e16;color:#bbf7d0;border:1px solid #166534;padding:10px 12px;border-radius:10px;display:none;z-index:1000}
     .toast.show{display:block}
 
-    /* ==== Light theme readability hardening ==== */
+    /* Light theme hardening */
     [data-theme="light"] .card { background:#ffffff; border-color:#e2e8f0; }
     [data-theme="light"] .thumb { background:#f1f5f9; }
     [data-theme="light"] .info { color:#0f172a; }
@@ -64,50 +64,13 @@
     [data-theme="light"] .info .unit { color:#475569; }
     [data-theme="light"] .info .price { color:#0f172a; font-weight:900; }
     [data-theme="light"] .qty .icon { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .field { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
+    [data-theme="light"] .field, [data-theme="light"] select { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
     [data-theme="light"] .btn { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
     [data-theme="light"] .cartbar { background:rgba(255,255,255,.97); }
-
-    /* === FORCE LIGHT THEME READABILITY OVERRIDES === */
-    [data-theme="light"] .card { background:#ffffff !important; border-color:#e2e8f0 !important; }
-    [data-theme="light"] .thumb { background:#f1f5f9 !important; }
-    [data-theme="light"] .info { color:#0f172a !important; }
-    [data-theme="light"] .info .name { color:#0f172a !important; font-weight:900 !important; }
-    [data-theme="light"] .info .unit { color:#475569 !important; }
-    [data-theme="light"] .info .price { color:#0f172a !important; font-weight:900 !important; }
-    [data-theme="light"] .field, 
-    [data-theme="light"] select { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
-    [data-theme="light"] .btn { background:#ffffff !important; color:#0f172a !important; border-color:#e2e8f0 !important; }
-    [data-theme="light"] .cartbar { background:rgba(255,255,255,.97) !important; }
-    [data-theme="light"] .card, 
-    [data-theme="light"] .card * { color: #0f172a !important; }
-    [data-theme="light"] .card .unit { color: #475569 !important; }
-    [data-theme="light"] .card .price { color: #0f172a !important; font-weight: 900 !important; }
-    [data-theme="light"] body,
-    [data-theme="light"] .side,
-    [data-theme="light"] .toolbar,
-    [data-theme="light"] .cats button,
-    [data-theme="light"] .search input,
-    [data-theme="light"] .field,
-    [data-theme="light"] select,
-    [data-theme="light"] .btn,
-    [data-theme="light"] .cartbar,
-    [data-theme="light"] .checkout,
-    [data-theme="light"] .line { color: #0f172a !important; }
-    [data-theme="light"] input::placeholder,
-    [data-theme="light"] textarea::placeholder { color: #64748b !important; opacity: 1 !important; }
-    [data-theme="light"] .info,
-    [data-theme="light"] .info .name,
-    [data-theme="light"] .info .price { color:#0f172a !important; }
-    [data-theme="light"] .info .unit { color:#475569 !important; }
-    [data-theme="light"] .qty .icon i,
-    [data-theme="light"] .cats button i { color:#0f172a !important; }
-    [data-theme="light"] a, 
-    [data-theme="light"] strong { color:#0f172a !important; }
   </style>
 
   <style>
-    /* ===== Overlay de texto SOLO en modo claro ===== */
+    /* Overlay de texto SOLO en modo claro */
     [data-theme="light"] .card { display: grid; }
     [data-theme="light"] .thumb,
     [data-theme="light"] .info { grid-area: 1 / 1; }
@@ -248,7 +211,14 @@
   <script>
     // ====== CONSTANTES Y HELPERS ======
     const PLACEHOLDER_IMG = "https://via.placeholder.com/640x420?text=La+Peruana";
-    const fmt = (n)=> Number(n||0).toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0});
+
+    // Quita todo lo no numérico y devuelve entero ARS
+    const toARS = (x) => {
+      if (typeof x === 'number' && isFinite(x)) return Math.round(x);
+      const s = String(x ?? '').replace(/[^\d]/g, '');
+      return s ? Math.round(Number(s)) : 0;
+    };
+    const fmt = (n)=> toARS(n).toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0});
     const slug = (s)=> String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
     const toast = (msg) => {
@@ -317,16 +287,24 @@
       data: {},
       load(){ try{ this.data = JSON.parse(localStorage.getItem(this.key)) || {} }catch{ this.data = {} }; UI.sync() },
       save(){ localStorage.setItem(this.key, JSON.stringify(this.data)); UI.sync() },
-      add(p){ const id=slug(p.name); if(!this.data[id]) this.data[id]={...p, qty:0}; this.data[id].qty++; this.save(); toast("Agregado") },
+      add(p){
+        const id=slug(p.name);
+        const safe = { ...p, price: toARS(p.price) };
+        if(!this.data[id]) this.data[id]={...safe, qty:0};
+        this.data[id].qty++;
+        this.data[id].price = toARS(this.data[id].price);
+        this.save(); toast("Agregado");
+      },
       dec(id){ if(!this.data[id]) return; this.data[id].qty--; if(this.data[id].qty<=0) delete this.data[id]; this.save() },
-      set(id,q){ if(q<=0) delete this.data[id]; else if(this.data[id]) this.data[id].qty=q; this.save() },
+      set(id,q){
+        if(q<=0){ delete this.data[id]; this.save(); return; }
+        if(this.data[id]){ this.data[id].qty=q; this.data[id].price = toARS(this.data[id].price); this.save(); }
+      },
       clear(){ this.data={}; this.save() },
       items(){ return Object.values(this.data) },
       count(){ return this.items().reduce((a,b)=>a+b.qty,0) },
-      subtotal(){ return this.items().reduce((a,b)=>a+b.price*b.qty,0) }
+      subtotal(){ return this.items().reduce((a,b)=>a + toARS(b.price)*b.qty, 0) }
     };
-
-    const Zones = { centro:1500, "parana-este":2200, "area-metropolitana":3000 };
 
     const Data = {
       overrideFromQuery(){
@@ -341,17 +319,19 @@
         }catch{}
       },
       async loadFromSheets() {
-        if(!SHEETS_GVIZ_URL) return; // no tocar catálogo si no hay URL
+        if(!SHEETS_GVIZ_URL) return;
         try{
           const url = normalizeSheetsUrl(SHEETS_GVIZ_URL);
           const bust = (url.includes("?") ? "&" : "?") + "t=" + Date.now(); // anti-cache
           const res = await fetch(url + bust, { cache:"no-store" });
           const text = await res.text();
 
-          // Si vino HTML (no público o link incorrecto)
+          // Si vino HTML (no público o link incorrecto) -> restaurar default
           if (/<\s*html[\s>]/i.test(text)) {
-            toast("Sheet no público o URL incorrecta. Compartí como 'Cualquiera con el enlace (Lector)'.");
-            console.warn("Respuesta HTML en vez de GVIZ JSON");
+            toast("Sheet no público o URL incorrecta. Restauro URL por defecto.");
+            console.warn("Respuesta HTML en vez de GVIZ JSON. Restaurando default.");
+            SHEETS_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
+            localStorage.setItem("sheets_gviz_url", SHEETS_GVIZ_URL);
             return;
           }
 
@@ -360,17 +340,26 @@
           const json = JSON.parse(payload);
           const rows = json.table?.rows || [];
 
+          // Limpiar y agrupar
           const tmp = {}; for(const c of Categories) tmp[c.id]=[];
+
           for(const r of rows){
             const c = r.c || [];
-            const category = (c[0]?.v||"").toString().trim();
-            const name = (c[1]?.v||"").toString().trim();
-            const price = parseInt((c[2]?.v||0), 10) || 0;
-            const unit  = (c[3]?.v||"").toString().trim();
-            const combo = String(c[4]?.v).toLowerCase()==="true";
-            const image = (c[5]?.v||"").toString().trim();
-            const stock = parseInt((c[6]?.v||999), 10) || 999;
 
+            // HOJA ACTUAL: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen
+            const category = (c[0]?.v||"").toString().trim();
+            const name     = (c[1]?.v||"").toString().trim();
+            const unit     = (c[2]?.v||"").toString().trim();
+
+            const rawPrice = c[3]?.v;
+            const price    = (typeof rawPrice === 'number') ? Math.round(rawPrice) : toARS(rawPrice);
+
+            const rawImage = (c[4]?.v||"").toString().trim();
+            const img = rawImage.includes("/file/d/")
+              ? ("https://drive.google.com/uc?export=view&id=" + (rawImage.match(/\/d\/([A-Za-z0-9_-]+)/)?.[1]||""))
+              : (rawImage || PLACEHOLDER_IMG);
+
+            // Normalización de categoría a IDs internos
             const n = category.toLowerCase();
             let id="almacen";
             if(n.includes("cafeter")) id="cafeteria";
@@ -382,16 +371,13 @@
             else if(n.includes("fiambr")||n.includes("queso")||n.includes("charcut")) id="fiambreria";
             else if(n.includes("bebid")||n.includes("cerve")||n.includes("gaseosa")) id="bebidas";
 
-            const item={name,price,unit,stock};
-            if(combo) item.combo=true;
-            item.image = image || PLACEHOLDER_IMG;
-
-            tmp[id].push(item);
+            const item={ name, unit, price, image: img };
+            if(name) tmp[id].push(item);
           }
 
           let imported = 0; for(const k in tmp) imported += tmp[k].length;
           if(imported>0) { Catalog = tmp; UI.grid(); toast(`Catálogo actualizado (${imported} ítems)`); }
-          else { toast("Sheet vacío: mantengo catálogo local"); }
+          else { toast("Sheet vacío o columnas sin datos: mantengo catálogo local"); }
         }catch(e){
           console.error(e); toast("No se pudo cargar el Sheet: mantengo catálogo local");
         }
@@ -457,11 +443,11 @@
         cats.forEach(c=>{
           const list = this.productsOf(c)
             .filter(p=> !State.q || p.name.toLowerCase().includes(State.q))
-            .filter(p=> (State.minp? p.price>=parseInt(State.minp,10):true) && (State.maxp? p.price<=parseInt(State.maxp,10):true))
+            .filter(p=> (State.minp? toARS(p.price)>=toARS(State.minp):true) && (State.maxp? toARS(p.price)<=toARS(State.maxp):true))
             .slice();
 
-          if(State.sort==="price_asc") list.sort((a,b)=>a.price-b.price);
-          else if(State.sort==="price_desc") list.sort((a,b)=>b.price-a.price);
+          if(State.sort==="price_asc") list.sort((a,b)=> toARS(a.price)-toARS(b.price));
+          else if(State.sort==="price_desc") list.sort((a,b)=> toARS(b.price)-toARS(a.price));
           else if(State.sort==="alpha") list.sort((a,b)=> a.name.localeCompare(b.name,'es'));
 
           list.forEach(p=>{
@@ -494,7 +480,7 @@
         this.checkoutSync();
       },
       shippingFee(){ return 0; }, // envío deshabilitado
-      discounts(sub){ 
+      discounts(sub){
         const coupon = (document.getElementById("f_coupon").value||"").trim().toUpperCase();
         const payment = document.getElementById("f_payment").value;
         let disc = 0;
@@ -543,7 +529,7 @@
         toast("Pedido confirmado");
 
         const phone = WHATSAPP_NUMBER.replace(/\D/g,"");
-        const lines = order.items.map(it => `• ${it.name} x${it.qty} – ${fmt(it.price*it.qty)}`);
+        const lines = order.items.map(it => `• ${it.name} x${it.qty} – ${fmt(toARS(it.price)*it.qty)}`);
         const info = [
           `👤 ${order.customer.name||"Cliente"}`,
           order.customer.phone ? `📞 ${order.customer.phone}` : "",
@@ -560,7 +546,14 @@
       }
     };
 
-    UI.init();
+    const UI = {
+      ...UI
+    };
+
+    // ===== INIT =====
+    (function init(){
+      document.addEventListener('DOMContentLoaded', ()=> UI.init());
+    })();
   </script>
 </body>
 </html>
