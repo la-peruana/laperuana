@@ -55,35 +55,17 @@
     .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(148,163,184,.2)}
     .toast{position:fixed;right:12px;bottom:12px;background:#052e16;color:#bbf7d0;border:1px solid #166534;padding:10px 12px;border-radius:10px;display:none;z-index:1000}
     .toast.show{display:block}
-
-    /* Light theme hardening */
-    [data-theme="light"] .card { background:#ffffff; border-color:#e2e8f0; }
-    [data-theme="light"] .thumb { background:#f1f5f9; }
-    [data-theme="light"] .info { color:#0f172a; }
-    [data-theme="light"] .info .name { color:#0f172a; font-weight:900; }
-    [data-theme="light"] .info .unit { color:#475569; }
-    [data-theme="light"] .info .price { color:#0f172a; font-weight:900; }
-    [data-theme="light"] .qty .icon { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .field, [data-theme="light"] select { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .btn { background:#ffffff; color:#0f172a; border-color:#e2e8f0; }
-    [data-theme="light"] .cartbar { background:rgba(255,255,255,.97); }
   </style>
 
   <style>
     /* Overlay de texto SOLO en modo claro */
     [data-theme="light"] .card { display: grid; }
-    [data-theme="light"] .thumb,
-    [data-theme="light"] .info { grid-area: 1 / 1; }
+    [data-theme="light"] .thumb, [data-theme="light"] .info { grid-area: 1 / 1; }
     [data-theme="light"] .thumb { position: relative; height: 180px; overflow: hidden; }
-    [data-theme="light"] .thumb::after {
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.60), rgba(0,0,0,0)); z-index: 0;
-    }
+    [data-theme="light"] .thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.60), rgba(0,0,0,0)); z-index: 0; }
     [data-theme="light"] .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
     [data-theme="light"] .info { position: relative; z-index: 1; align-self: end; padding: 12px; gap: 6px; }
-    [data-theme="light"] .info .name,
-    [data-theme="light"] .info .unit,
-    [data-theme="light"] .info .price {
+    [data-theme="light"] .info .name, [data-theme="light"] .info .unit, [data-theme="light"] .info .price {
       color: var(--text) !important;
       text-shadow: 0 1px 2px rgba(255,255,255,.25), 0 0 1px rgba(0,0,0,.25);
     }
@@ -212,7 +194,7 @@
     // ====== CONSTANTES Y HELPERS ======
     const PLACEHOLDER_IMG = "https://via.placeholder.com/640x420?text=La+Peruana";
 
-    // Quita todo lo no numérico y devuelve entero ARS
+    // Limpia a entero ARS
     const toARS = (x) => {
       if (typeof x === 'number' && isFinite(x)) return Math.round(x);
       const s = String(x ?? '').replace(/[^\d]/g, '');
@@ -228,21 +210,21 @@
     };
 
     // === CONFIG ===
-    const WHATSAPP_NUMBER = "+5493435075991"; // recepción
+    const WHATSAPP_NUMBER = "+5493435075991";
     const DEFAULT_SHEET_ID = "1CQGnxb4l_9dLQzcLngSeCfyDKJRv7bem";
     const DEFAULT_GID = "1645617335";
 
-    // URL GVIZ por defecto o la guardada
+    // URL GVIZ por defecto o guardada
     let SHEETS_GVIZ_URL =
       localStorage.getItem("sheets_gviz_url") ||
       `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
 
-    // Normaliza cualquier URL (edit/share/csv) a GVIZ JSON válido
+    // Normaliza cualquier URL a GVIZ
     function normalizeSheetsUrl(u) {
       if (!u) return "";
       try {
         const url = new URL(u);
-        if (url.pathname.includes("/gviz/tq")) return u; // ya es gviz
+        if (url.pathname.includes("/gviz/tq")) return u;
         const m = url.pathname.match(/\/d\/([a-zA-Z0-9-_]+)/);
         const id = m?.[1];
         const gid = url.searchParams.get("gid") || (/gid=(\d+)/.exec(u)?.[1] ?? "");
@@ -252,7 +234,7 @@
           return base + (gid ? `&gid=${gid}` : `&sheet=${encodeURIComponent(sheet)}`);
         }
       } catch {}
-      return u; // fallback
+      return u;
     }
 
     const Categories = [
@@ -267,17 +249,17 @@
       { id:"cafeteria", name:"Cafetería", icon:"fa-mug-saucer" }
     ];
 
-    // Catálogo local fallback
+    // Catálogo de respaldo (si Sheet falla)
     let Catalog = {
-      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" },{ name:"Torrejas de acelga", price:1225, unit:"x 3 unidades" },{ name:"Sándwich Simples", price:12846, unit:"bandeja x 6 un." },{ name:"Sándwich Triples", price:13588, unit:"bandeja x 6 un." },{ name:"Tortilla de papas", price:4782, unit:"porción" },{ name:"Tortilla de acelga", price:4863, unit:"porción" },{ name:"Terrina", price:3633, unit:"porción" },{ name:"Papas fritas", price:2591, unit:"porción" },{ name:"Hamburguesa Cheddar c- papas", price:8298, unit:"unidad" },{ name:"Hamburguesa LP c- papas", price:7447, unit:"unidad" },{ name:"Patamuslo", price:13196, unit:"unidad" },{ name:"Sándwich milanesa de pollo", price:5637, unit:"unidad" },{ name:"Sándwich milanesa de carne", price:8176, unit:"unidad" },{ name:"Sándwich milanesa de carne completo", price:9638, unit:"unidad" },{ name:"Pebete de jamón y queso", price:4782, unit:"unidad" },{ name:"Empanadas de choclo", price:6168, unit:"x 3 un." },{ name:"Empanadas de jamón y queso", price:4875, unit:"x 3 un." },{ name:"Empanadas Calabresa", price:4190, unit:"unidad" },{ name:"Empanadas de carne dulce", price:5551, unit:"x 3 un." },{ name:"Empanadas de verdura", price:4278, unit:"x 3 un." },{ name:"Empanadas de carne saladas", price:4923, unit:"x 3 un." },{ name:"Empanadas de pollo", price:4713, unit:"x 3 un." },{ name:"Milanesas de carne", price:11258, unit:"unidad" },{ name:"Milanesas de pollo", price:8344, unit:"unidad" }],
-      panaderia:[{ name:"Facturas con crema", price:2177, unit:"x 3 un." },{ name:"Facturas con crema y membrillo", price:2613, unit:"x 3 un." },{ name:"Facturas con crema y dulce de leche", price:1960, unit:"x 3 un." },{ name:"Medialunas con dulce de leche", price:2449, unit:"x 3 un." },{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades" },{ name:"Vigilantes de batata", price:2504, unit:"x 3 un." },{ name:"Vigilantes de membrillo", price:2308, unit:"x 3 un." },{ name:"Bollitos con crema", price:2068, unit:"x 3 un." },{ name:"Bollitos con dulce de leche", price:1960, unit:"x 3 un." },{ name:"Empanaditas de dulce de leche", price:1415, unit:"x 3 un." },{ name:"Pirulines", price:2177, unit:"x 3 un." },{ name:"Borrachitos", price:1960, unit:"x 3 un." },{ name:"Medialunas Marplatenses", price:1933, unit:"x 3 unidades" },{ name:"Especiales", price:2363, unit:"250 grs" },{ name:"Pan Francés", price:740, unit:"250 grs" },{ name:"Pan Rondín", price:715, unit:"250 grs" },{ name:"Galleta de campo", price:840, unit:"250 grs" },{ name:"Galleta hojaldrada", price:1018, unit:"250 grs" },{ name:"Suizos", price:3319, unit:"unidad" },{ name:"Medialunas saladas grandes", price:3281, unit:"250 grs" },{ name:"Medialunas saladas chicas", price:4024, unit:"250 grs" },{ name:"Croissant", price:2464, unit:"unidad" }],
-      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad" },{ name:"Mini bombón", price:1019, unit:"unidad" },{ name:"Mini lemon pie", price:1019, unit:"unidad" },{ name:"Mini frutal", price:1551, unit:"unidad" },{ name:"Lingote de durazno", price:2038, unit:"unidad" },{ name:"Lingote de frutilla", price:2038, unit:"unidad" },{ name:"Red Velvet", price:1699, unit:"unidad" },{ name:"Tiramisú", price:3057, unit:"unidad" },{ name:"Masas finas", price:7427, unit:"x 7 un." },{ name:"Alfajores de maicena grandes", price:1362, unit:"x 2 un." },{ name:"Alfajores de maicena medianos", price:1424, unit:"x 3 un." },{ name:"Alfajores de maicena mini", price:1485, unit:"x 5 un." },{ name:"Alfajores de chocolate grandes", price:1820, unit:"x 2 un." },{ name:"Alfajores de chocolate medianos", price:1903, unit:"x 3 un." },{ name:"Alfajores de chocolate mini", price:1986, unit:"x 5 un." }],
-      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg" },{ name:"Milanesa de pollo", price:12000, unit:"kg" },{ name:"Filet de pechuga", price:15500, unit:"kg" },{ name:"Costeletas cerdo", price:8400, unit:"kg" },{ name:"Hamburguesas carne común", price:8990, unit:"kg" },{ name:"Hamburguesas carne especial", price:17236, unit:"kg" },{ name:"Carne picada común", price:8990, unit:"kg" },{ name:"Carne picada especial", price:14260, unit:"kg" }],
-      verduleria:[{ name:"Zanahorias", price:984, unit:"kg" },{ name:"Tomates-redondos", price:5496, unit:"kg" },{ name:"Manzanas rojas", price:7458, unit:"kg" },{ name:"Bananas", price:4101, unit:"kg" }],
-      fiambreria:[{ name:"Bandeja Picada de fiambres surtidos LP x 800 grs (queso barra, bondiola, lomito, mortadela, jamón cocido, salame baston, pickles y aceitunas)", price:19600, unit:"bandeja" },{ name:"Bandeja picada de quesos surtidos LP x 500 grs", price:7435, unit:"bandeja" },{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" },{ name:"Bandeja Picada Paladini x 700 grs", price:15681, unit:"bandeja" },{ name:"Queso cremoso María Luisa x 500 grs", price:3955, unit:"bandeja" },{ name:"Queso barra María Luisa x 500 grs", price:4984, unit:"bandeja" },{ name:"Jamón cocido Lario feteado x 500 grs", price:11318, unit:"bandeja" },{ name:"Mortadela Paladini x 300 grs", price:5153, unit:"bandeja" }],
-      almacen:[{ name:"Paté de foie Molto", price:957, unit:"unidad" },{ name:"Puré de tomate Arcor", price:928, unit:"unidad" },{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" },{ name:"Fideos tallarín Matarazo", price:1855, unit:"unidad" },{ name:"Galletitas surtido Bagley", price:3560, unit:"unidad" },{ name:"Yerba Sinceridad", price:3931, unit:"x 1 kg" },{ name:"Aceite Natura", price:3978, unit:"900 ml" },{ name:"Azucar Ledesma", price:1648, unit:"x 1 kg" },{ name:"Celusal fina", price:1368, unit:"500 grs." },{ name:"Jabón liquido p-diluir ALA ropa", price:1540, unit:"150 ml." },{ name:"Suavizante Vivere clasico", price:3156, unit:"900 ml" },{ name:"Papel higienico Felpita", price:1820, unit:"4 x 30" }],
-      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella" },{ name:"Coca Cola 2.5L", price:4999, unit:"botella" },{ name:"Agua saborizadas Levité x 1.5L", price:1460, unit:"botella" },{ name:"Pritty Limón 2.25L", price:1910, unit:"botella" },{ name:"Pepsi 3L", price:2987, unit:"botella" },{ name:"Vino Otro Loco Más", price:4736, unit:"botella" },{ name:"Vino Finjamos Demencia", price:4784, unit:"botella" },{ name:"Vino Hormiga Negra", price:3394, unit:"botella" },{ name:"Cerveza Corona 330CC", price:3230, unit:"botella" },{ name:"Cerveza en lata Quilmes 473cc", price:1258, unit:"lata" },{ name:"Cerveza en lata Budweiser 473cc", price:1545, unit:"lata" }],
-      cafeteria:[{ name:"Café con leche grande + 2 medialunas marplatenses", price:4500, unit:"Combo" },{ name:"Café con leche grande + 2 medialunas saladas", price:3964, unit:"Combo" },{ name:"Café con leche grande + 2 alfajores de maicena", price:4473, unit:"Combo" },{ name:"Café con leche grande + Croissant", price:4473, unit:"Combo" },{ name:"Café con leche grande + 2 facturas", price:4500, unit:"Combo" },{ name:"Café con leche grande + 2 alfajores de chocolate", price:4473, unit:"Combo" }]
+      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" }],
+      panaderia:[{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades" }],
+      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad" }],
+      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg" }],
+      verduleria:[{ name:"Zanahorias", price:984, unit:"kg" }],
+      fiambreria:[{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" }],
+      almacen:[{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" }],
+      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella" }],
+      cafeteria:[{ name:"Café con leche + croissant", price:4473, unit:"Combo" }]
     };
 
     const State = { theme: localStorage.getItem("shop_theme") || "dark", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
@@ -303,7 +285,7 @@
       clear(){ this.data={}; this.save() },
       items(){ return Object.values(this.data) },
       count(){ return this.items().reduce((a,b)=>a+b.qty,0) },
-      subtotal(){ return this.items().reduce((a,b)=>a + toARS(b.price)*b.qty, 0) }
+      subtotal(){ return this.items().reduce((a,b)=> a + toARS(b.price)*b.qty, 0) }
     };
 
     const Data = {
@@ -340,15 +322,15 @@
           const json = JSON.parse(payload);
           const rows = json.table?.rows || [];
 
-          // Limpiar y agrupar
           const tmp = {}; for(const c of Categories) tmp[c.id]=[];
 
           for(const r of rows){
             const c = r.c || [];
 
-            // HOJA ACTUAL: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen
+            // HOJA: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen
             const category = (c[0]?.v||"").toString().trim();
             const name     = (c[1]?.v||"").toString().trim();
+            if(!name) continue; // salteo filas vacías
             const unit     = (c[2]?.v||"").toString().trim();
 
             const rawPrice = c[3]?.v;
@@ -359,7 +341,7 @@
               ? ("https://drive.google.com/uc?export=view&id=" + (rawImage.match(/\/d\/([A-Za-z0-9_-]+)/)?.[1]||""))
               : (rawImage || PLACEHOLDER_IMG);
 
-            // Normalización de categoría a IDs internos
+            // Normalización de categoría
             const n = category.toLowerCase();
             let id="almacen";
             if(n.includes("cafeter")) id="cafeteria";
@@ -371,8 +353,7 @@
             else if(n.includes("fiambr")||n.includes("queso")||n.includes("charcut")) id="fiambreria";
             else if(n.includes("bebid")||n.includes("cerve")||n.includes("gaseosa")) id="bebidas";
 
-            const item={ name, unit, price, image: img };
-            if(name) tmp[id].push(item);
+            tmp[id].push({ name, unit, price, image: img });
           }
 
           let imported = 0; for(const k in tmp) imported += tmp[k].length;
@@ -386,11 +367,21 @@
 
     const UI = {
       init(){
+        // tema
         document.documentElement.setAttribute("data-theme", State.theme);
-        document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro";
+        const lbl = document.getElementById("themeLabel"); if(lbl) lbl.textContent = State.theme==="dark" ? "Oscuro" : "Claro";
+
+        // URL por query ?sheets=...
         Data.overrideFromQuery();
+
+        // UI + datos locales
         this.cats(); this.grid(); this.bind(); Cart.load(); this.checkoutSync();
-        const initial = Object.values(Catalog).reduce((a,b)=>a+(b?.length||0),0); toast("Catálogo: "+initial+" ítems");
+
+        // info inicial
+        const initial = Object.values(Catalog).reduce((a,b)=>a+(b?.length||0),0);
+        toast("Catálogo: "+initial+" ítems");
+
+        // intentar cargar Sheet
         Data.loadFromSheets();
       },
       bind(){
@@ -438,7 +429,8 @@
       },
       productsOf(c){ return Catalog[c.id]||[] },
       grid(){
-        const wrap = document.getElementById("grid"); wrap.innerHTML="";
+        const wrap = document.getElementById("grid"); if(!wrap) return;
+        wrap.innerHTML="";
         const cats = State.q ? Categories : Categories.filter(c=>c.id===State.cat);
         cats.forEach(c=>{
           const list = this.productsOf(c)
@@ -474,34 +466,35 @@
         this.sync();
       },
       sync(){
-        const count = Cart.count(); document.getElementById("cartCount").textContent = `${count} ${count===1?'ítem':'ítems'}`;
-        document.getElementById("cartTotal").textContent = fmt(Cart.subtotal());
+        const count = Cart.count(); const cc=document.getElementById("cartCount"); if(cc) cc.textContent = `${count} ${count===1?'ítem':'ítems'}`;
+        const ct=document.getElementById("cartTotal"); if(ct) ct.textContent = fmt(Cart.subtotal());
         document.querySelectorAll('input[data-act="set"][data-key]').forEach(inp=>{ const key = inp.getAttribute("data-key"); inp.value = Cart.data[key]?.qty || 0; });
         this.checkoutSync();
       },
-      shippingFee(){ return 0; }, // envío deshabilitado
+      shippingFee(){ return 0; },
       discounts(sub){
         const coupon = (document.getElementById("f_coupon").value||"").trim().toUpperCase();
-        const payment = document.getElementById("f_payment").value;
         let disc = 0;
         if(coupon==="BIENVENIDO10") disc += Math.round(sub*0.10);
         return disc;
       },
       checkoutSync(){
-        const mode = document.getElementById("f_mode").value;
-        document.getElementById("rowAddress").style.display = (mode==="delivery") ? "grid":"none";
+        const mode = document.getElementById("f_mode")?.value || "delivery";
+        const row = document.getElementById("rowAddress"); if(row) row.style.display = (mode==="delivery") ? "grid":"none";
         const sub = Cart.subtotal();
-        const ship = 0; // envío deshabilitado
+        const ship = 0;
         const disc = this.discounts(sub);
-        document.getElementById("sum_sub").textContent = fmt(sub);
-        document.getElementById("sum_disc").textContent = "-" + fmt(disc);
-        document.getElementById("sum_total").textContent = fmt(Math.max(0, sub + ship - disc));
+        const ssub=document.getElementById("sum_sub"); if(ssub) ssub.textContent = fmt(sub);
+        const sdisc=document.getElementById("sum_disc"); if(sdisc) sdisc.textContent = "-" + fmt(disc);
+        const stot=document.getElementById("sum_total"); if(stot) stot.textContent = fmt(Math.max(0, sub + ship - disc));
 
-        const pay = document.getElementById("f_payment").value;
+        const pay = document.getElementById("f_payment")?.value || "efectivo";
         const hints = document.getElementById("payHints");
-        if(pay==="transferencia") hints.textContent = "Transferencia: te enviaremos alias/CBU al confirmar.";
-        else if(pay==="mercadopago") hints.textContent = "Mercado Pago: te enviaremos un link de pago al confirmar.";
-        else hints.textContent = "Efectivo: recordá tener cambio exacto.";
+        if(hints){
+          if(pay==="transferencia") hints.textContent = "Transferencia: te enviaremos alias/CBU al confirmar.";
+          else if(pay==="mercadopago") hints.textContent = "Mercado Pago: te enviaremos un link de pago al confirmar.";
+          else hints.textContent = "Efectivo: recordá tener cambio exacto.";
+        }
       },
       confirmOrder(){
         if(Cart.count()===0){ toast("Carrito vacío"); return; }
@@ -546,14 +539,8 @@
       }
     };
 
-    const UI = {
-      ...UI
-    };
-
-    // ===== INIT =====
-    (function init(){
-      document.addEventListener('DOMContentLoaded', ()=> UI.init());
-    })();
+    // ===== INIT (sin re-declarar UI) =====
+    document.addEventListener('DOMContentLoaded', () => UI.init());
   </script>
 </body>
 </html>
