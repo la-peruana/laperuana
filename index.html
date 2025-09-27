@@ -191,13 +191,6 @@
   <div class="toast" id="toast">Agregado al carrito</div>
 
   <script>
-// === IMÁGENES DESDE GITHUB PAGES ===
-const GITHUB_USER = "la-peruana";          // tu organización/usuario
-const GITHUB_REPO = "laperuana";           // repo correcto
-const GITHUB_BRANCH = "main";              // rama que publica
-const GITHUB_PAGES_BASE = `https://${GITHUB_USER}.github.io/${GITHUB_REPO}/`;
-const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del repo
-
     // ====== CONSTANTES Y HELPERS ======
     const PLACEHOLDER_IMG = "https://via.placeholder.com/640x420?text=La+Peruana";
 
@@ -234,61 +227,14 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
         if (url.pathname.includes("/gviz/tq")) return u;
         const m = url.pathname.match(/\/d\/([a-zA-Z0-9-_]+)/);
         const id = m?.[1];
-        // Soporta enlaces "edit" y "view" con gid; también sheet=
         const gid = url.searchParams.get("gid") || (/gid=(\d+)/.exec(u)?.[1] ?? "");
         const sheet = url.searchParams.get("sheet") || "";
-        if (id) {
+        if (id && (gid || sheet)) {
           const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`;
-          if (gid) return `${base}&gid=${gid}`;
-          if (sheet) return `${base}&sheet=${encodeURIComponent(sheet)}`;
-          // fallback a la primera hoja (si no hay gid/sheet)
-          return `${base}`;
+          return base + (gid ? `&gid=${gid}` : `&sheet=${encodeURIComponent(sheet)}`);
         }
       } catch {}
       return u;
-    }
-
-    // Normalizador robusto de URLs (Drive + genéricas)
-    function normalizeImageUrl(u) {
-  if (!u) return "";
-  u = String(u).trim();
-
-  // A) Si viene absoluta http/https
-  if (/^https?:\/\//i.test(u)) {
-    // 1) github.com/.../blob/...  -> raw.githubusercontent.com/...
-    let m = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/i);
-    if (m) {
-      const [, user, repo, branch, path] = m;
-      u = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
-    }
-
-    // 2) github.com/.../raw/... -> raw.githubusercontent.com/...
-    m = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/raw\/([^\/]+)\/(.+)$/i);
-    if (m) {
-      const [, user, repo, branch, path] = m;
-      u = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
-    }
-
-    // 3) raw.githubusercontent.com/{user}/{repo}/{branch}/{path} -> PAGES
-    m = u.match(/^https?:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/i);
-    if (m) {
-      const [, user, repo, branch, path] = m;
-      return `https://${user}.github.io/${repo}/${path}`;
-    }
-
-    // 4) Si ya es Pages u otra URL https válida, devolver tal cual
-    return u.replace(/^http:/i, "https:");
-  }
-
-  // B) Si NO es absoluta: permitir ruta relativa o solo nombre
-  const isPath = /[\/\]/.test(u);
-  const path = isPath ? u.replace(/^\.?\/*/, "") : (DEFAULT_IMG_DIR + u);
-  return GITHUB_PAGES_BASE + path;
-}
-`;
-        return u;
-      }
-      return ""; // nombres sueltos => inválidos para web estática
     }
 
     const Categories = [
@@ -305,15 +251,15 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
 
     // Catálogo de respaldo (si Sheet falla)
     let Catalog = {
-      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades", image: PLACEHOLDER_IMG }],
-      panaderia:[{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades", image: PLACEHOLDER_IMG }],
-      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad", image: PLACEHOLDER_IMG }],
-      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg", image: PLACEHOLDER_IMG }],
-      verduleria:[{ name:"Zanahorias", price:984, unit:"kg", image: PLACEHOLDER_IMG }],
-      fiambreria:[{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja", image: PLACEHOLDER_IMG }],
-      almacen:[{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg", image: PLACEHOLDER_IMG }],
-      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella", image: PLACEHOLDER_IMG }],
-      cafeteria:[{ name:"Café con leche + croissant", price:4473, unit:"Combo", image: PLACEHOLDER_IMG }]
+      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" }],
+      panaderia:[{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades" }],
+      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad" }],
+      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg" }],
+      verduleria:[{ name:"Zanahorias", price:984, unit:"kg" }],
+      fiambreria:[{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" }],
+      almacen:[{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" }],
+      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella" }],
+      cafeteria:[{ name:"Café con leche + croissant", price:4473, unit:"Combo" }]
     };
 
     const State = { theme: localStorage.getItem("shop_theme") || "dark", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
@@ -362,19 +308,18 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
           const res = await fetch(url + bust, { cache:"no-store" });
           const text = await res.text();
 
-          // Si vino HTML (no público o link incorrecto) -> restaurar default y reintentar 1 vez
+          // Si vino HTML (no público o link incorrecto) -> restaurar default
           if (/<\s*html[\s>]/i.test(text)) {
             toast("Sheet no público o URL incorrecta. Restauro URL por defecto.");
             console.warn("Respuesta HTML en vez de GVIZ JSON. Restaurando default.");
             SHEETS_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
             localStorage.setItem("sheets_gviz_url", SHEETS_GVIZ_URL);
-            return Data.loadFromSheets();
+            return;
           }
 
-          // Extrae JSON de setResponse(...) de forma robusta
-          const m = text.match(/setResponse\(\s*([\s\S]*?)\s*\)\s*;?\s*$/);
-          if(!m) throw new Error("GVIZ: formato inesperado");
-          const json = JSON.parse(m[1]);
+          // GVIZ: /**/google.visualization.Query.setResponse({...});
+          const payload = text.replace(/^[\s\S]*?setResponse\(/, "").replace(/\);?\s*$/, "");
+          const json = JSON.parse(payload);
           const rows = json.table?.rows || [];
 
           const tmp = {}; for(const c of Categories) tmp[c.id]=[];
@@ -382,7 +327,7 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
           for(const r of rows){
             const c = r.c || [];
 
-            // HOJA: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen, (F opcional=Imagen)
+            // HOJA: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen
             const category = (c[0]?.v||"").toString().trim();
             const name     = (c[1]?.v||"").toString().trim();
             if(!name) continue; // salteo filas vacías
@@ -391,10 +336,10 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
             const rawPrice = c[3]?.v;
             const price    = (typeof rawPrice === 'number') ? Math.round(rawPrice) : toARS(rawPrice);
 
-            const rawImageE = (c[4]?.v||"").toString().trim();
-            const rawImageF = (c[5]?.v||"").toString().trim();
-            const rawImage  = rawImageE || rawImageF;
-            const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
+            const rawImage = (c[4]?.v||"").toString().trim();
+            const img = rawImage.includes("/file/d/")
+              ? ("https://drive.google.com/uc?export=view&id=" + (rawImage.match(/\/d\/([A-Za-z0-9_-]+)/)?.[1]||""))
+              : (rawImage || PLACEHOLDER_IMG);
 
             // Normalización de categoría
             const n = category.toLowerCase();
@@ -501,9 +446,7 @@ const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del re
             const key = slug(p.name);
             const card = document.createElement("div"); card.className="card";
             const th = document.createElement("div"); th.className="thumb";
-            const img=document.createElement("img"); img.alt=p.name; img.src=p.image || PLACEHOLDER_IMG;
-attachProductImageOnError(img, (p && p.name) || '', PLACEHOLDER_IMG);
- img.onerror = ()=> { img.src = PLACEHOLDER_IMG };
+            const img=document.createElement("img"); img.alt=p.name; img.src=p.image || PLACEHOLDER_IMG; img.onerror = ()=> { img.src = PLACEHOLDER_IMG };
             th.appendChild(img); card.appendChild(th);
 
             const info = document.createElement("div"); info.className="info";
@@ -598,19 +541,6 @@ attachProductImageOnError(img, (p && p.name) || '', PLACEHOLDER_IMG);
 
     // ===== INIT (sin re-declarar UI) =====
     document.addEventListener('DOMContentLoaded', () => UI.init());
-  
-// Fallback de imagen: intenta repo antes de placeholder
-function attachProductImageOnError(imgEl, productName, placeholder) {
-  if (!imgEl) return;
-  imgEl.onerror = () => {
-    const slug = (s) => String(s || "").toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-    const guess = `${GITHUB_PAGES_BASE}${DEFAULT_IMG_DIR}${slug(productName)}.jpg`;
-    if (imgEl.src !== guess) { imgEl.src = guess; return; }
-    imgEl.src = placeholder || imgEl.src; // último recurso
-  };
-}
-</script>
+  </script>
 </body>
 </html>
