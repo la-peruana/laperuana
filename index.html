@@ -219,33 +219,40 @@
       localStorage.getItem("sheets_gviz_url") ||
       `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
 
-   // Lee columna E (Imagen)
-const rawImage = (c[4]?.v || "").toString().trim();
-
-// Normalizador robusto de URLs (Drive + genéricas)
-function normalizeImageUrl(u) {
-  if (!u) return "";
-  // Si ya es http(s) la dejamos pasar, pero si es Drive la convertimos a uc?export=view
-  if (/^https?:\/\//i.test(u)) {
-    // Intentamos extraer el ID de todas las variantes más comunes
-    const m =
-      u.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||  // .../file/d/ID/...
-      u.match(/\/d\/([A-Za-z0-9_-]+)/)      ||  // .../d/ID/...
-      u.match(/[?&]id=([A-Za-z0-9_-]+)/);       // ...?id=ID
-    if (m && m[1]) {
-      return `https://drive.google.com/uc?export=view&id=${m[1]}`;
-    }
-    return u; // No es Drive o no se pudo extraer ID → dejar tal cual
-  }
-  // Si no es URL absoluta (p.ej. "foto.jpg") devolvemos vacío para que use placeholder
-  return "";
-}
-
-const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
-
+    // Normaliza cualquier URL a GVIZ
+    function normalizeSheetsUrl(u) {
+      if (!u) return "";
+      try {
+        const url = new URL(u);
+        if (url.pathname.includes("/gviz/tq")) return u;
+        const m = url.pathname.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        const id = m?.[1];
+        // Soporta enlaces "edit" y "view" con gid; también sheet=
+        const gid = url.searchParams.get("gid") || (/gid=(\d+)/.exec(u)?.[1] ?? "");
+        const sheet = url.searchParams.get("sheet") || "";
+        if (id) {
+          const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`;
+          if (gid) return `${base}&gid=${gid}`;
+          if (sheet) return `${base}&sheet=${encodeURIComponent(sheet)}`;
+          // fallback a la primera hoja (si no hay gid/sheet)
+          return `${base}`;
         }
       } catch {}
       return u;
+    }
+
+    // Normalizador robusto de URLs (Drive + genéricas)
+    function normalizeImageUrl(u) {
+      if (!u) return "";
+      if (/^https?:\/\//i.test(u)) {
+        const m =
+          u.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||
+          u.match(/\/d\/([A-Za-z0-9_-]+)/) ||
+          u.match(/[?&]id=([A-Za-z0-9_-]+)/);
+        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+        return u;
+      }
+      return ""; // nombres sueltos => inválidos para web estática
     }
 
     const Categories = [
@@ -262,15 +269,15 @@ const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
 
     // Catálogo de respaldo (si Sheet falla)
     let Catalog = {
-      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades" }],
-      panaderia:[{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades" }],
-      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad" }],
-      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg" }],
-      verduleria:[{ name:"Zanahorias", price:984, unit:"kg" }],
-      fiambreria:[{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja" }],
-      almacen:[{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg" }],
-      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella" }],
-      cafeteria:[{ name:"Café con leche + croissant", price:4473, unit:"Combo" }]
+      rotiseria:[{ name:"Torrejas de arroz", price:1225, unit:"x 3 unidades", image: PLACEHOLDER_IMG }],
+      panaderia:[{ name:"Medialunas dulces", price:1851, unit:"x 3 unidades", image: PLACEHOLDER_IMG }],
+      pasteleria:[{ name:"Cheese cake individual", price:6362, unit:"unidad", image: PLACEHOLDER_IMG }],
+      carniceria:[{ name:"Milanesa de carne", price:13500, unit:"kg", image: PLACEHOLDER_IMG }],
+      verduleria:[{ name:"Zanahorias", price:984, unit:"kg", image: PLACEHOLDER_IMG }],
+      fiambreria:[{ name:"Bandeja Picada Lario x 700 grs", price:15681, unit:"bandeja", image: PLACEHOLDER_IMG }],
+      almacen:[{ name:"Arroz Gallo oro", price:2909, unit:"x 1 kg", image: PLACEHOLDER_IMG }],
+      bebidas:[{ name:"Coca Cola 1.5L", price:3810, unit:"botella", image: PLACEHOLDER_IMG }],
+      cafeteria:[{ name:"Café con leche + croissant", price:4473, unit:"Combo", image: PLACEHOLDER_IMG }]
     };
 
     const State = { theme: localStorage.getItem("shop_theme") || "dark", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
@@ -319,18 +326,19 @@ const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
           const res = await fetch(url + bust, { cache:"no-store" });
           const text = await res.text();
 
-          // Si vino HTML (no público o link incorrecto) -> restaurar default
+          // Si vino HTML (no público o link incorrecto) -> restaurar default y reintentar 1 vez
           if (/<\s*html[\s>]/i.test(text)) {
             toast("Sheet no público o URL incorrecta. Restauro URL por defecto.");
             console.warn("Respuesta HTML en vez de GVIZ JSON. Restaurando default.");
             SHEETS_GVIZ_URL = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
             localStorage.setItem("sheets_gviz_url", SHEETS_GVIZ_URL);
-            return;
+            return Data.loadFromSheets();
           }
 
-          // GVIZ: /**/google.visualization.Query.setResponse({...});
-          const payload = text.replace(/^[\s\S]*?setResponse\(/, "").replace(/\);?\s*$/, "");
-          const json = JSON.parse(payload);
+          // Extrae JSON de setResponse(...) de forma robusta
+          const m = text.match(/setResponse\(\s*([\s\S]*?)\s*\)\s*;?\s*$/);
+          if(!m) throw new Error("GVIZ: formato inesperado");
+          const json = JSON.parse(m[1]);
           const rows = json.table?.rows || [];
 
           const tmp = {}; for(const c of Categories) tmp[c.id]=[];
@@ -338,7 +346,7 @@ const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
           for(const r of rows){
             const c = r.c || [];
 
-            // HOJA: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen
+            // HOJA: A=Categoría, B=Nombre, C=Unidad, D=Precio, E=Imagen, (F opcional=Imagen)
             const category = (c[0]?.v||"").toString().trim();
             const name     = (c[1]?.v||"").toString().trim();
             if(!name) continue; // salteo filas vacías
@@ -347,10 +355,10 @@ const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
             const rawPrice = c[3]?.v;
             const price    = (typeof rawPrice === 'number') ? Math.round(rawPrice) : toARS(rawPrice);
 
-            const rawImage = (c[4]?.v||"").toString().trim();
-            const img = rawImage.includes("/file/d/")
-              ? ("https://drive.google.com/uc?export=view&id=" + (rawImage.match(/\/d\/([A-Za-z0-9_-]+)/)?.[1]||""))
-              : (rawImage || PLACEHOLDER_IMG);
+            const rawImageE = (c[4]?.v||"").toString().trim();
+            const rawImageF = (c[5]?.v||"").toString().trim();
+            const rawImage  = rawImageE || rawImageF;
+            const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
 
             // Normalización de categoría
             const n = category.toLowerCase();
