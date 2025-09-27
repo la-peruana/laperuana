@@ -219,19 +219,30 @@
       localStorage.getItem("sheets_gviz_url") ||
       `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:json&gid=${DEFAULT_GID}`;
 
-    // Normaliza cualquier URL a GVIZ
-    function normalizeSheetsUrl(u) {
-      if (!u) return "";
-      try {
-        const url = new URL(u);
-        if (url.pathname.includes("/gviz/tq")) return u;
-        const m = url.pathname.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        const id = m?.[1];
-        const gid = url.searchParams.get("gid") || (/gid=(\d+)/.exec(u)?.[1] ?? "");
-        const sheet = url.searchParams.get("sheet") || "";
-        if (id && (gid || sheet)) {
-          const base = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`;
-          return base + (gid ? `&gid=${gid}` : `&sheet=${encodeURIComponent(sheet)}`);
+   // Lee columna E (Imagen)
+const rawImage = (c[4]?.v || "").toString().trim();
+
+// Normalizador robusto de URLs (Drive + genéricas)
+function normalizeImageUrl(u) {
+  if (!u) return "";
+  // Si ya es http(s) la dejamos pasar, pero si es Drive la convertimos a uc?export=view
+  if (/^https?:\/\//i.test(u)) {
+    // Intentamos extraer el ID de todas las variantes más comunes
+    const m =
+      u.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||  // .../file/d/ID/...
+      u.match(/\/d\/([A-Za-z0-9_-]+)/)      ||  // .../d/ID/...
+      u.match(/[?&]id=([A-Za-z0-9_-]+)/);       // ...?id=ID
+    if (m && m[1]) {
+      return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    }
+    return u; // No es Drive o no se pudo extraer ID → dejar tal cual
+  }
+  // Si no es URL absoluta (p.ej. "foto.jpg") devolvemos vacío para que use placeholder
+  return "";
+}
+
+const img = normalizeImageUrl(rawImage) || PLACEHOLDER_IMG;
+
         }
       } catch {}
       return u;
