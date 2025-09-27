@@ -191,6 +191,13 @@
   <div class="toast" id="toast">Agregado al carrito</div>
 
   <script>
+// === IMÁGENES DESDE GITHUB PAGES ===
+const GITHUB_USER = "la-peruana";          // tu organización/usuario
+const GITHUB_REPO = "laperuana";           // repo correcto
+const GITHUB_BRANCH = "main";              // rama que publica
+const GITHUB_PAGES_BASE = `https://${GITHUB_USER}.github.io/${GITHUB_REPO}/`;
+const DEFAULT_IMG_DIR = "assets/img/";     // carpeta de imágenes dentro del repo
+
     // ====== CONSTANTES Y HELPERS ======
     const PLACEHOLDER_IMG = "https://via.placeholder.com/640x420?text=La+Peruana";
 
@@ -243,13 +250,42 @@
 
     // Normalizador robusto de URLs (Drive + genéricas)
     function normalizeImageUrl(u) {
-      if (!u) return "";
-      if (/^https?:\/\//i.test(u)) {
-        const m =
-          u.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||
-          u.match(/\/d\/([A-Za-z0-9_-]+)/) ||
-          u.match(/[?&]id=([A-Za-z0-9_-]+)/);
-        if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  if (!u) return "";
+  u = String(u).trim();
+
+  // A) Si viene absoluta http/https
+  if (/^https?:\/\//i.test(u)) {
+    // 1) github.com/.../blob/...  -> raw.githubusercontent.com/...
+    let m = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/i);
+    if (m) {
+      const [, user, repo, branch, path] = m;
+      u = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+    }
+
+    // 2) github.com/.../raw/... -> raw.githubusercontent.com/...
+    m = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/raw\/([^\/]+)\/(.+)$/i);
+    if (m) {
+      const [, user, repo, branch, path] = m;
+      u = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+    }
+
+    // 3) raw.githubusercontent.com/{user}/{repo}/{branch}/{path} -> PAGES
+    m = u.match(/^https?:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/i);
+    if (m) {
+      const [, user, repo, branch, path] = m;
+      return `https://${user}.github.io/${repo}/${path}`;
+    }
+
+    // 4) Si ya es Pages u otra URL https válida, devolver tal cual
+    return u.replace(/^http:/i, "https:");
+  }
+
+  // B) Si NO es absoluta: permitir ruta relativa o solo nombre
+  const isPath = /[\/\]/.test(u);
+  const path = isPath ? u.replace(/^\.?\/*/, "") : (DEFAULT_IMG_DIR + u);
+  return GITHUB_PAGES_BASE + path;
+}
+`;
         return u;
       }
       return ""; // nombres sueltos => inválidos para web estática
@@ -465,7 +501,9 @@
             const key = slug(p.name);
             const card = document.createElement("div"); card.className="card";
             const th = document.createElement("div"); th.className="thumb";
-            const img=document.createElement("img"); img.alt=p.name; img.src=p.image || PLACEHOLDER_IMG; img.onerror = ()=> { img.src = PLACEHOLDER_IMG };
+            const img=document.createElement("img"); img.alt=p.name; img.src=p.image || PLACEHOLDER_IMG;
+attachProductImageOnError(img, (p && p.name) || '', PLACEHOLDER_IMG);
+ img.onerror = ()=> { img.src = PLACEHOLDER_IMG };
             th.appendChild(img); card.appendChild(th);
 
             const info = document.createElement("div"); info.className="info";
@@ -560,6 +598,19 @@
 
     // ===== INIT (sin re-declarar UI) =====
     document.addEventListener('DOMContentLoaded', () => UI.init());
-  </script>
+  
+// Fallback de imagen: intenta repo antes de placeholder
+function attachProductImageOnError(imgEl, productName, placeholder) {
+  if (!imgEl) return;
+  imgEl.onerror = () => {
+    const slug = (s) => String(s || "").toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    const guess = `${GITHUB_PAGES_BASE}${DEFAULT_IMG_DIR}${slug(productName)}.jpg`;
+    if (imgEl.src !== guess) { imgEl.src = guess; return; }
+    imgEl.src = placeholder || imgEl.src; // último recurso
+  };
+}
+</script>
 </body>
 </html>
