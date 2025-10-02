@@ -191,6 +191,40 @@
   <div class="toast" id="toast">Agregado al carrito</div>
 
   <script>
+// === IMÁGENES EN GITHUB (carpeta /img del mismo repo) ===
+const IMG_BASE = "img/"; // si tu carpeta es otra, cámbiala aquí
+
+function resolveImage(raw, fallbackName){
+  const v = (raw || "").trim();
+
+  // 1) Data URI o URL absoluta (https)
+  if (/^data:image\//i.test(v)) return v;
+  if (/^https?:\/\//i.test(v)) {
+    // Soporte a Google Drive si pegaste un link público
+    if (v.includes("drive.google.com")) {
+      const m = v.match(/\/d\/([A-Za-z0-9_-]+)/) || v.match(/id=([^&]+)/);
+      if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    }
+    return v;
+  }
+
+  // 2) Ruta relativa o simple nombre de archivo
+  //    - si ya trae subcarpeta (p.ej. "img/pizza.png"), la respetamos
+  //    - si sólo trae nombre (p.ej. "pizza"), lo convertimos a IMG_BASE + "pizza.jpg"
+  const hasSlash = v.includes("/");
+  const hasExt   = /\.(png|jpe?g|webp|gif|svg)$/i.test(v);
+  const basePath = hasSlash ? v : (IMG_BASE + v || "");
+  if (basePath) return hasExt ? basePath : (basePath + ".jpg");
+
+  // 3) Si la celda viene vacía, intentamos con un nombre derivado del producto
+  const guessed = (fallbackName || "").toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  return guessed ? `${IMG_BASE}${guessed}.jpg` : PLACEHOLDER_IMG;
+}
+</script>
+
+  <script>
     // ====== CONSTANTES Y HELPERS ======
     const PLACEHOLDER_IMG = "https://via.placeholder.com/640x420?text=La+Peruana";
 
