@@ -40,19 +40,20 @@
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
     .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
 
-    /* Miniaturas responsivas: no tapan el texto */
+    /* Miniaturas: visibles sin recorte */
     .thumb{
-      height:clamp(110px, 18vw, 160px);
-      overflow:hidden;
-      display:grid;
-      place-items:center;
+      aspect-ratio: 4 / 3;
+      width: 100%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
       background:#f1f5f9;
-      position:relative;
+      padding: 6px;
     }
     .thumb img{
       width:100%;
       height:100%;
-      object-fit:contain; /* evita recortar y superponer texto */
+      object-fit:contain; /* no recorta */
       display:block;
     }
     [data-theme="dark"] .thumb{background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(6,182,212,.12))}
@@ -65,13 +66,9 @@
     .btn{border:1px solid rgba(148,163,184,.25);background:#fff;color:var(--text);border-radius:10px;padding:10px 12px;cursor:pointer}
     [data-theme="dark"] .btn{background:#0b1220;color:#e2e8f0;border-color:#334155}
     .qty{display:flex;gap:6px;align-items:center}
-    .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#fff;color:var(--text)}
+    .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#fff;color:#0f172a}
     [data-theme="dark"] .qty .icon{background:#0b1220;color:#e2e8f0;border-color:#334155}
-
-    /* En móviles, tarjetas más angostas */
-    @media (max-width: 480px){
-      .grid{ grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
-    }
+    @media (max-width:480px){ .grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))} }
 
     /* Cart FAB + Modal */
     .cart-fab{position:fixed;top:16px;right:16px;background:var(--primary);color:#fff;border:none;border-radius:999px;box-shadow:0 6px 22px rgba(229,66,68,.35);padding:.7em 1.1em;font-size:1.02em;z-index:90;cursor:pointer;display:flex;align-items:center;gap:.6em;font-weight:800}
@@ -79,33 +76,47 @@
 
     .modal-bg{display:none;position:fixed;z-index:100;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center}
     .modal-bg.active{display:flex}
-    .modal{background:var(--card);border-radius:18px;max-width:560px;width:96vw;padding:1.2em .9em .9em .9em;box-shadow:0 10px 40px rgba(0,0,0,.25);position:relative}
+    .modal{background:var(--card);border-radius:18px;max-width:640px;width:96vw;padding:1.2em .9em .9em .9em;box-shadow:0 10px 40px rgba(0,0,0,.25);position:relative}
     .modal h2{margin:.2em 2.2em .2em 2.2em;color:var(--primary);text-align:center}
     .close{position:absolute;top:.5em;right:.6em;background:transparent;border:none;font-size:1.6em;color:var(--primary-600);cursor:pointer}
+
     .carrito-list{max-height:320px;overflow-y:auto;margin:.7em 0 .9em;padding:0 .3em}
     .row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.5em;align-items:center;padding:.55em 0;border-bottom:1px solid rgba(148,163,184,.2)}
     .row-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .row-mini{display:flex;gap:.35em}
     .mini{width:26px;height:26px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-weight:900;cursor:pointer}
-    .row-price{text-align:right;min-width:80px}
-    .row-sub{text-align:right;min-width:80px}
+    .row-price,.row-sub{text-align:right;min-width:80px}
     .row-remove{border:1px solid rgba(148,163,184,.25);background:#fff;border-radius:10px;padding:.25em .55em;color:#777;cursor:pointer}
     [data-theme="dark"] .row-remove{background:#0b1220;color:#e2e8f0;border-color:#334155}
 
     .modal-actions{display:flex;gap:.6em;justify-content:space-between;align-items:center;margin-top:.6em}
     .btn-clear{background:#fff;color:#c1121f;border:1px solid #f0b1b5;border-radius:12px;padding:.55em .9em;cursor:pointer;font-weight:800}
     .total{font-weight:900;color:var(--primary);font-size:1.14em;flex:1;text-align:right}
+
     .btn-wa{display:block;width:100%;background:#25D366;color:#fff;font-weight:900;border:none;border-radius:24px;padding:.8em 0;font-size:1.08em;text-decoration:none;cursor:pointer;margin-top:.4em;box-shadow:0 4px 18px rgba(37,211,102,.35);text-align:center}
+    .btn-wa[disabled]{opacity:.6;pointer-events:none}
 
     .toast{position:fixed;right:12px;bottom:12px;background:#052e16;color:#bbf7d0;border:1px solid #166534;padding:10px 12px;border-radius:10px;display:none;z-index:1000}
     .toast.show{display:block}
+
+    /* Paso 2: formulario */
+    .step{display:block}
+    .hidden{display:none !important}
+    .form{display:grid;gap:.8em;margin:.4em 0}
+    .form .row-2{display:grid;grid-template-columns:1fr;gap:.8em}
+    @media(min-width:520px){ .form .row-2{grid-template-columns:1fr 1fr} }
+    .form label{font-size:.92em;color:var(--muted)}
+    .form input,.form textarea{
+      width:100%;padding:.75em .9em;border-radius:12px;border:1px solid rgba(148,163,184,.25);background:#fff;color:var(--text)
+    }
+    [data-theme="dark"] .form input,[data-theme="dark"] .form textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}
+    .error{color:#b91c1c;font-size:.9em;margin-top:-.4em}
   </style>
 </head>
 <body>
   <header>
     <div class="h-in">
       <div class="brand">
-        <!-- logo también desde el repo -->
         <img src="https://raw.githubusercontent.com/la-peruana/laperuana/main/LOGO-LA-PERUANA.jpg" alt="La Peruana" />
         <strong>La Peruana</strong>
       </div>
@@ -146,17 +157,49 @@
     </main>
   </div>
 
-  <!-- Modal Carrito (detalle y confirmación) -->
+  <!-- Modal Carrito + Paso 2 (Datos) -->
   <div class="modal-bg" id="cartModalBg">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
       <button class="close" id="closeCart" title="Cerrar" aria-label="Cerrar">&times;</button>
       <h2 id="cartTitle">Tu Carrito</h2>
-      <div class="carrito-list" id="cartList"></div>
-      <div class="modal-actions">
-        <button class="btn-clear" id="btnClear">Eliminar todo</button>
-        <div class="total" id="cartTotalModal"></div>
+
+      <!-- Paso 1: Carrito -->
+      <div id="cartStep" class="step">
+        <div class="carrito-list" id="cartList"></div>
+        <div class="modal-actions">
+          <button class="btn-clear" id="btnClear">Eliminar todo</button>
+          <div class="total" id="cartTotalModal"></div>
+        </div>
+        <button class="btn-wa" id="btnContinue">Continuar</button>
       </div>
-      <a class="btn-wa" id="btnWA" target="_blank" rel="noopener">Confirmar y enviar por WhatsApp</a>
+
+      <!-- Paso 2: Datos personales -->
+      <div id="detailsStep" class="step hidden" aria-live="polite">
+        <div class="form">
+          <div class="row-2">
+            <div>
+              <label for="custName">Nombre y apellido</label>
+              <input id="custName" autocomplete="name" placeholder="Ej: Juan Pérez">
+              <div id="errName" class="error" style="display:none">Ingresá tu nombre y apellido.</div>
+            </div>
+            <div>
+              <label for="custAddress">Domicilio de entrega</label>
+              <input id="custAddress" autocomplete="street-address" placeholder="Calle, número, barrio">
+              <div id="errAddress" class="error" style="display:none">Ingresá tu domicilio.</div>
+            </div>
+          </div>
+          <div>
+            <label for="custNotes">Notas (opcional)</label>
+            <textarea id="custNotes" rows="2" placeholder="Indicaciones adicionales, horario, timbre, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-clear" id="btnBack">Volver</button>
+          <div class="total" id="cartTotalModal2"></div>
+        </div>
+        <a class="btn-wa" id="btnWA" target="_blank" rel="noopener" aria-disabled="true">Enviar por WhatsApp</a>
+      </div>
     </div>
   </div>
 
@@ -164,15 +207,13 @@
 
   <script>
     // ===== Config =====
-    // Imágenes desde tu repo (RAÍZ del repo):
-    const IMAGE_BASE = "https://raw.githubusercontent.com/la-peruana/laperuana/main/";
+    const IMAGE_BASE = "https://raw.githubusercontent.com/la-peruana/laperuana/main/"; // raíz del repo
     const WHATSAPP_NUMBER = "5493435075991"; // sin + ni espacios
 
     // ===== Utilidades =====
     const CURRENCY = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS", maximumFractionDigits:0});
     const fmt = n => CURRENCY.format(n);
     const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
-
     const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='28' font-family='Arial'>Imagen</text></svg>";
 
     // ===== Categorías =====
@@ -332,7 +373,7 @@
       ]
     };
 
-    // Normalizar rutas de imagen al base definido (encode nombres con espacios/acentos)
+    // Normalizar rutas de imagen (encode nombres con espacios/acentos)
     Object.keys(Catalog).forEach(k=>{
       Catalog[k] = Catalog[k].map(p => ({
         ...p,
@@ -344,8 +385,22 @@
       }));
     });
 
-    // ===== Estado / Carrito =====
+    // ===== Estado / Carrito / Usuario =====
     const State = { theme: localStorage.getItem("shop_theme") || "light", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
+
+    const User = {
+      key: "shop_user_v1",
+      data: { name:"", address:"", notes:"" },
+      load(){
+        try { const v = JSON.parse(localStorage.getItem(this.key));
+          if(v && typeof v==='object') this.data = {...this.data, ...v};
+        } catch {}
+      },
+      save(partial){
+        this.data = {...this.data, ...partial};
+        localStorage.setItem(this.key, JSON.stringify(this.data));
+      }
+    };
 
     const Cart = {
       key:"shop_cart_v2",
@@ -365,7 +420,9 @@
     const toast = (msg) => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400) };
 
     const UI = {
+      step: "cart", // "cart" | "details"
       init(){
+        User.load();
         document.documentElement.setAttribute("data-theme", State.theme);
         document.getElementById("themeLabel").textContent = State.theme==="dark" ? "Oscuro" : "Claro";
         this.cats(); this.grid(); this.bind(); Cart.load();
@@ -377,10 +434,45 @@
         document.getElementById("apply").onclick = ()=>{ State.minp = document.getElementById("minp").value; State.maxp = document.getElementById("maxp").value; this.grid(); };
         document.getElementById("clear").onclick = ()=>{ State.minp=""; State.maxp=""; document.getElementById("minp").value=""; document.getElementById("maxp").value=""; this.grid(); };
 
-        document.getElementById("openCart").onclick = ()=>{ this.renderCart(); document.getElementById("cartModalBg").classList.add("active"); };
+        document.getElementById("openCart").onclick = ()=>{ this.step="cart"; this.renderCart(); this.showStep(); document.getElementById("cartModalBg").classList.add("active"); };
         document.getElementById("closeCart").onclick = ()=> document.getElementById("cartModalBg").classList.remove("active");
         document.getElementById("cartModalBg").onclick = function(e){ if(e.target===this) this.classList.remove("active"); };
         document.getElementById("btnClear").onclick = ()=>{ if(confirm("¿Vaciar todo el carrito?")){ Cart.clear(); UI.renderCart(); toast("Carrito vacío"); } };
+
+        document.getElementById("btnContinue").onclick = ()=> {
+          if (Cart.items().length===0) { toast("El carrito está vacío"); return; }
+          this.step="details";
+          this.renderDetails();
+          this.showStep();
+        };
+        document.getElementById("btnBack").onclick = ()=> { this.step="cart"; this.showStep(); };
+
+        // Autoguardado y actualización del link de WhatsApp
+        const bindSave = (id, key) => {
+          const el = document.getElementById(id);
+          el.addEventListener('input', () => {
+            const value = el.value.trimStart(); // no recortar al final mientras escribe
+            User.save({ [key]: value });
+            this.updateWA();
+          });
+        };
+        bindSave("custName","name");
+        bindSave("custAddress","address");
+        bindSave("custNotes","notes");
+      },
+      showStep(){
+        const cartStep = document.getElementById("cartStep");
+        const detailsStep = document.getElementById("detailsStep");
+        const title = document.getElementById("cartTitle");
+        if(this.step==="cart"){
+          cartStep.classList.remove("hidden");
+          detailsStep.classList.add("hidden");
+          title.textContent = "Tu Carrito";
+        }else{
+          cartStep.classList.add("hidden");
+          detailsStep.classList.remove("hidden");
+          title.textContent = "Datos para el pedido";
+        }
       },
       cats(){
         const el = document.getElementById("cats"); el.innerHTML="";
@@ -403,31 +495,24 @@
           list.forEach(p=>{
             const key = slug(p.name);
             const card = document.createElement("div"); card.className="card";
-
             const th = document.createElement("div"); th.className="thumb";
             const img=document.createElement("img");
             img.alt=p.name; img.loading="lazy"; img.decoding="async";
             img.src=p.image || PLACEHOLDER_IMG;
             img.onerror = ()=> { console.warn("No carga la imagen:", img.src); img.src = PLACEHOLDER_IMG; };
-            th.appendChild(img);
-            card.appendChild(th);
+            th.appendChild(img); card.appendChild(th);
 
             const info = document.createElement("div"); info.className="info";
             info.innerHTML = `<div class="name">${p.name}</div><div class="unit">${p.unit||""}</div><div class="price">${fmt(p.price)}</div>`;
-
             const acts = document.createElement("div"); acts.className="actions";
             acts.innerHTML = `<div class="qty">
                 <div class="icon" data-act="dec" data-key="${key}"><i class="fa-solid fa-minus"></i></div>
                 <input class="btn" style="width:60px;text-align:center" value="${Cart.data[key]?.qty||0}" data-act="set" data-key="${key}" readonly/>
                 <div class="icon" data-act="inc" data-key="${key}"><i class="fa-solid fa-plus"></i></div>
               </div>`;
-
             acts.querySelector('[data-act="inc"]').onclick = () => Cart.add(p);
             acts.querySelector('[data-act="dec"]').onclick = () => Cart.dec(key);
-
-            info.appendChild(acts);
-            card.appendChild(info);
-            wrap.appendChild(card);
+            info.appendChild(acts); card.appendChild(info); wrap.appendChild(card);
           });
         });
         this.sync();
@@ -440,7 +525,14 @@
       renderCart(){
         const list = document.getElementById('cartList'); list.innerHTML = '';
         const items = Cart.items();
-        if(items.length===0){ list.innerHTML = '<div style="text-align:center;color:#777;font-style:italic">¡El carrito está vacío!</div>'; document.getElementById('cartTotalModal').textContent=''; document.getElementById('btnWA').style.display='none'; return; }
+        const btnContinue = document.getElementById('btnContinue');
+        if(items.length===0){
+          list.innerHTML = '<div style="text-align:center;color:#777;font-style:italic">¡El carrito está vacío!</div>';
+          document.getElementById('cartTotalModal').textContent='';
+          btnContinue.disabled = true;
+          return;
+        }
+        btnContinue.disabled = false;
         let total = 0;
         items.forEach(it=>{
           const id = slug(it.name);
@@ -459,10 +551,6 @@
           list.appendChild(row);
         });
         document.getElementById('cartTotalModal').textContent = `Total: ${fmt(total)}`;
-        const msg = this.whatsAppMessage(items, total);
-        const phone = WHATSAPP_NUMBER.replace(/\D/g,"");
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-        const btn = document.getElementById('btnWA'); btn.href=url; btn.style.display='block';
 
         // Delegación de eventos para +/-/quitar
         list.onclick = (e)=>{
@@ -473,9 +561,56 @@
           this.renderCart(); this.grid();
         };
       },
-      whatsAppMessage(items,total){
+      renderDetails(){
+        // Prefill desde localStorage
+        document.getElementById('custName').value = User.data.name || "";
+        document.getElementById('custAddress').value = User.data.address || "";
+        document.getElementById('custNotes').value = User.data.notes || "";
+        document.getElementById('cartTotalModal2').textContent = `Total: ${fmt(Cart.subtotal())}`;
+        this.updateWA();
+      },
+      getUser(){
+        const name = (document.getElementById('custName').value || "").trim();
+        const address = (document.getElementById('custAddress').value || "").trim();
+        const notes = (document.getElementById('custNotes').value || "").trim();
+        return {name,address,notes};
+      },
+      validateUser(){
+        const {name,address} = this.getUser();
+        let ok = true;
+        const errN = document.getElementById('errName');
+        const errA = document.getElementById('errAddress');
+        if(!name){ errN.style.display='block'; ok=false; } else { errN.style.display='none'; }
+        if(!address){ errA.style.display='block'; ok=false; } else { errA.style.display='none'; }
+        return ok;
+      },
+      whatsAppMessage(items,total,user){
         const lines = items.map(it=> `• ${it.name} x${it.qty} – ${fmt(it.price*it.qty)}`);
-        return [`*Pedido La Peruana*`,`\n*Detalle:*`,...lines,`\n*Total:* ${fmt(total)}`].join("\n");
+        const head = [`*Pedido La Peruana*`];
+        const datos = [
+          `\n*Datos del cliente*`,
+          `• Nombre: ${user.name}`,
+          `• Domicilio: ${user.address}`,
+          user.notes ? `• Notas: ${user.notes}` : null
+        ].filter(Boolean);
+        return [...head, `\n*Detalle:*`, ...lines, `\n*Total:* ${fmt(total)}`, `\n`, ...datos].join("\n");
+      },
+      updateWA(){
+        const btn = document.getElementById('btnWA');
+        const userOk = this.validateUser();
+        btn.setAttribute('aria-disabled', userOk ? 'false' : 'true');
+        if(!userOk){
+          btn.setAttribute('disabled','disabled');
+          btn.removeAttribute('href');
+          return;
+        }
+        btn.removeAttribute('disabled');
+        const items = Cart.items();
+        const total = Cart.subtotal();
+        const msg = this.whatsAppMessage(items, total, this.getUser());
+        const phone = WHATSAPP_NUMBER.replace(/\D/g,"");
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        btn.href = url;
       }
     };
 
