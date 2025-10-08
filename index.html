@@ -11,7 +11,6 @@
     [data-theme="dark"]{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e2e8f0; --shadow:0 10px 30px rgba(0,0,0,.35) }
     *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
 
-    /* Header */
     header{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);background:rgba(255,255,255,.9);border-bottom:1px solid rgba(148,163,184,.25)}
     [data-theme="dark"] header{background:rgba(15,23,42,.85)}
     .h-in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
@@ -24,7 +23,6 @@
     .btn-lite{border:1px solid rgba(148,163,184,.25);padding:8px 12px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;background:#fff;color:var(--text)}
     [data-theme="dark"] .btn-lite{background:#0b1220;border-color:#334155;color:#e2e8f0}
 
-    /* Layout */
     .layout{max-width:1200px;margin:0 auto;padding:16px;display:grid;grid-template-columns:260px 1fr;gap:16px}
     @media(max-width:980px){ .layout{grid-template-columns:1fr} }
     .side{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
@@ -36,7 +34,6 @@
     .toolbar select, .toolbar input{padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,.25);background:#fff;color:var(--text)}
     [data-theme="dark"] .toolbar select, [data-theme="dark"] .toolbar input{background:#0b1220;border-color:#334155;color:#e2e8f0}
 
-    /* Cards */
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
     .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
     .thumb{height:150px;background:#f1f5f9;display:grid;place-items:center;color:#e11d48;font-size:26px;position:relative}
@@ -53,7 +50,6 @@
     .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#fff;color:var(--text)}
     [data-theme="dark"] .qty .icon{background:#0b1220;color:#e2e8f0;border-color:#334155}
 
-    /* Cart FAB + Modal */
     .cart-fab{position:fixed;top:16px;right:16px;background:var(--primary);color:#fff;border:none;border-radius:999px;box-shadow:0 6px 22px rgba(229,66,68,.35);padding:.7em 1.1em;font-size:1.02em;z-index:90;cursor:pointer;display:flex;align-items:center;gap:.6em;font-weight:800}
     .cart-pill{display:inline-flex;background:var(--accent);color:#7a1517;border-radius:999px;font-weight:800;font-size:.93em;padding:.12em .6em;align-items:center;gap:.4em}
 
@@ -125,7 +121,7 @@
     </main>
   </div>
 
-  <!-- Modal Carrito (detalle y confirmación) -->
+  <!-- Modal Carrito -->
   <div class="modal-bg" id="cartModalBg">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
       <button class="close" id="closeCart" title="Cerrar" aria-label="Cerrar">&times;</button>
@@ -143,8 +139,10 @@
 
   <script>
     // ===== Config =====
-    const IMAGE_BASE = "./img/"; // carpeta /img/ local (o cambiala por tu repo GitHub raw)
-    const WHATSAPP_NUMBER = "5493435075991"; // sin + ni espacios
+    // Podés dejar vacío RAW_FALLBACK_BASE o poner tu repo raw (opcional, último intento):
+    // Ej: "https://raw.githubusercontent.com/la-peruana/laperuana/main/img/"
+    const RAW_FALLBACK_BASE = "";
+    const WHATSAPP_NUMBER = "5493435075991";
 
     // ===== Utilidades =====
     const CURRENCY = new Intl.NumberFormat("es-AR", {style:"currency", currency:"ARS", maximumFractionDigits:0});
@@ -152,6 +150,63 @@
     const slug = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
 
     const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='28' font-family='Arial'>Imagen</text></svg>";
+
+    // ===== Helpers robustos de imagen =====
+    const asciiKebab = (s)=>
+      s.trim()
+       .toLowerCase()
+       .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+       .replace(/\s+/g,"-");
+
+    const hasExt = f => /\.[a-z0-9]+$/i.test(f);
+    const addExts = (base)=> hasExt(base) ? [base]
+                                         : [base+".jpg", base+".jpeg", base+".png", base+".webp"];
+
+    const IMG_DIRS = ["./img/", "img/", "/img/", "./images/", "images/", "/images/"];
+
+    function candidateURLs(filename){
+      if(!filename) return [];
+      if(/^https?:\/\//i.test(filename)) return [filename];
+
+      const names = Array.from(new Set([
+        filename,
+        asciiKebab(filename),
+        filename.toLowerCase(),
+        asciiKebab(filename).toLowerCase()
+      ]));
+
+      const files = names.flatMap(addExts);
+      const dirUrls = [];
+
+      for(const dir of IMG_DIRS){
+        for(const f of files){
+          // URL absoluta respecto a la página actual
+          dirUrls.push(new URL(dir + f, location.href).href);
+        }
+      }
+      if(RAW_FALLBACK_BASE){
+        for(const f of files){
+          dirUrls.push(RAW_FALLBACK_BASE + encodeURI(f));
+        }
+      }
+      return Array.from(new Set(dirUrls)); // sin duplicados
+    }
+
+    function attachSmartImage(imgEl, filename){
+      const tries = candidateURLs(filename);
+      let i = 0;
+
+      function tryNext(){
+        if(i < tries.length){
+          imgEl.src = tries[i++];
+        }else{
+          imgEl.src = PLACEHOLDER_IMG;
+          imgEl.title = "No se encontró la imagen";
+        }
+      }
+      imgEl.onerror = tryNext;
+      tryNext();
+    }
 
     // ===== Categorías =====
     const Categories = [
@@ -167,7 +222,7 @@
       { id:"higiene",     name:"Higiene personal", icon:"fa-pump-soap" }
     ];
 
-    // ===== Catálogo =====
+    // ===== Catálogo (dejamos los nombres tal cual los tenés) =====
     const Catalog = {
       panaderia: [
         { name: "Facturas con crema x 3 un", price: 2177, image: "facturas-crema.jpg" },
@@ -310,14 +365,6 @@
       ]
     };
 
-    // Normalizar rutas de imagen al base definido
-    Object.keys(Catalog).forEach(k=>{
-      Catalog[k] = Catalog[k].map(p => ({
-        ...p,
-        image: p.image ? (p.image.startsWith('http') ? p.image : IMAGE_BASE + p.image) : undefined
-      }));
-    });
-
     // ===== Estado / Carrito =====
     const State = { theme: localStorage.getItem("shop_theme") || "light", cat: Categories[0].id, q:"", sort:"relevance", minp:"", maxp:"" };
 
@@ -335,7 +382,6 @@
       subtotal(){ return this.items().reduce((a,b)=>a+b.price*b.qty,0) }
     };
 
-    // ===== UI =====
     const toast = (msg) => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400) };
 
     const UI = {
@@ -378,9 +424,11 @@
             const key = slug(p.name);
             const card = document.createElement("div"); card.className="card";
             const th = document.createElement("div"); th.className="thumb";
-            if(p.image){ const img=document.createElement("img"); img.alt=p.name; img.src=p.image; img.onerror = ()=> { img.src = PLACEHOLDER_IMG }; th.appendChild(img); }
-            else{ const img=document.createElement("img"); img.alt=p.name; img.src=PLACEHOLDER_IMG; th.appendChild(img); }
+            const img=document.createElement("img"); img.alt=p.name;
+            attachSmartImage(img, p.image); // <<--- aquí la magia
+            th.appendChild(img);
             card.appendChild(th);
+
             const info = document.createElement("div"); info.className="info";
             info.innerHTML = `<div class="name">${p.name}</div><div class="unit">${p.unit||""}</div><div class="price">${fmt(p.price)}</div>`;
             const acts = document.createElement("div"); acts.className="actions";
@@ -429,7 +477,6 @@
         const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
         const btn = document.getElementById('btnWA'); btn.href=url; btn.style.display='block';
 
-        // Delegación de eventos para +/-/quitar
         list.onclick = (e)=>{
           const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; const action = btn.dataset.action; if(!id||!action) return;
           if(action==='dec'){ Cart.dec(id); }
