@@ -40,7 +40,7 @@
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
     .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
 
-    /* Miniaturas corregidas: no tapan el texto */
+    /* Miniaturas responsivas: no tapan el texto */
     .thumb{
       height:clamp(110px, 18vw, 160px);
       overflow:hidden;
@@ -68,7 +68,7 @@
     .qty .icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(148,163,184,.25);border-radius:8px;cursor:pointer;background:#fff;color:var(--text)}
     [data-theme="dark"] .qty .icon{background:#0b1220;color:#e2e8f0;border-color:#334155}
 
-    /* En móviles, tarjetas un poco más angostas */
+    /* En móviles, tarjetas más angostas */
     @media (max-width: 480px){
       .grid{ grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
     }
@@ -105,7 +105,8 @@
   <header>
     <div class="h-in">
       <div class="brand">
-        <img src="LOGO-LA-PERUANA.jpg" alt="La Peruana" />
+        <!-- logo también desde el repo -->
+        <img src="https://raw.githubusercontent.com/la-peruana/laperuana/main/LOGO-LA-PERUANA.jpg" alt="La Peruana" />
         <strong>La Peruana</strong>
       </div>
       <div class="search">
@@ -124,6 +125,20 @@
     <aside class="side">
       <h3>Categorías</h3>
       <div id="cats" class="cats"></div>
+      <hr style="border-color:rgba(148,163,184,.2)">
+      <h3>Filtros</h3>
+      <div class="toolbar">
+        <select id="sort">
+          <option value="relevance">Relevancia</option>
+          <option value="price_asc">Precio ↑</option>
+          <option value="price_desc">Precio ↓</option>
+          <option value="alpha">A–Z</option>
+        </select>
+        <input id="minp" placeholder="Precio min" inputmode="numeric">
+        <input id="maxp" placeholder="Precio max" inputmode="numeric">
+        <button class="btn" id="apply">Aplicar</button>
+        <button class="btn" id="clear">Limpiar</button>
+      </div>
     </aside>
 
     <main>
@@ -149,7 +164,8 @@
 
   <script>
     // ===== Config =====
-    const IMAGE_BASE = "./img/"; // carpeta /img/ local (o cambiala por tu repo GitHub raw)
+    // Imágenes desde tu repo (RAÍZ del repo):
+    const IMAGE_BASE = "https://raw.githubusercontent.com/la-peruana/laperuana/main/";
     const WHATSAPP_NUMBER = "5493435075991"; // sin + ni espacios
 
     // ===== Utilidades =====
@@ -316,11 +332,15 @@
       ]
     };
 
-    // Normalizar rutas de imagen al base definido
+    // Normalizar rutas de imagen al base definido (encode nombres con espacios/acentos)
     Object.keys(Catalog).forEach(k=>{
       Catalog[k] = Catalog[k].map(p => ({
         ...p,
-        image: p.image ? (p.image.startsWith('http') ? p.image : IMAGE_BASE + p.image) : undefined
+        image: p.image
+          ? (p.image.startsWith('http')
+              ? p.image
+              : IMAGE_BASE + encodeURIComponent(p.image))
+          : undefined
       }));
     });
 
@@ -383,25 +403,31 @@
           list.forEach(p=>{
             const key = slug(p.name);
             const card = document.createElement("div"); card.className="card";
+
             const th = document.createElement("div"); th.className="thumb";
             const img=document.createElement("img");
             img.alt=p.name; img.loading="lazy"; img.decoding="async";
             img.src=p.image || PLACEHOLDER_IMG;
-            img.onerror = ()=> { img.src = PLACEHOLDER_IMG };
+            img.onerror = ()=> { console.warn("No carga la imagen:", img.src); img.src = PLACEHOLDER_IMG; };
             th.appendChild(img);
             card.appendChild(th);
 
             const info = document.createElement("div"); info.className="info";
             info.innerHTML = `<div class="name">${p.name}</div><div class="unit">${p.unit||""}</div><div class="price">${fmt(p.price)}</div>`;
+
             const acts = document.createElement("div"); acts.className="actions";
             acts.innerHTML = `<div class="qty">
                 <div class="icon" data-act="dec" data-key="${key}"><i class="fa-solid fa-minus"></i></div>
                 <input class="btn" style="width:60px;text-align:center" value="${Cart.data[key]?.qty||0}" data-act="set" data-key="${key}" readonly/>
                 <div class="icon" data-act="inc" data-key="${key}"><i class="fa-solid fa-plus"></i></div>
               </div>`;
+
             acts.querySelector('[data-act="inc"]').onclick = () => Cart.add(p);
             acts.querySelector('[data-act="dec"]').onclick = () => Cart.dec(key);
-            info.appendChild(acts); card.appendChild(info); wrap.appendChild(card);
+
+            info.appendChild(acts);
+            card.appendChild(info);
+            wrap.appendChild(card);
           });
         });
         this.sync();
