@@ -21,7 +21,7 @@
     .search input{width:100%;padding:12px 42px;border-radius:999px;border:1px solid rgba(148,163,184,.25);background:#fff;color:var(--text)}
     [data-theme="dark"] .search input{background:#0b1220;border-color:#334155;color:#e2e8f0}
     .search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
-    .btn-lite{border:1px solid rgba(148,163,184,.25);padding:8px 12px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;background:#fff;color:var(--text)}
+    .btn-lite{border:1px solid rgba(148,163,184,.25);padding:8px 12px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;cursor:pointer;background:#fff;color:#var(--text)}
     [data-theme="dark"] .btn-lite{background:#0b1220;border-color:#334155;color:#e2e8f0}
 
     /* Layout */
@@ -40,18 +40,8 @@
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
     .card{background:var(--card);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
 
-    /* 📷 Miniaturas: la imagen define su altura (sin recortes ni altura fija) */
-    .thumb{
-      width:100%;
-      height:auto;        /* <- sin altura fija */
-      overflow:visible;   /* permitir crecer */
-      background:#f1f5f9;
-    }
-    .thumb img{
-      display:block;
-      width:100%;         /* ocupa el ancho de la tarjeta */
-      height:auto;        /* conserva proporción y muestra TODO */
-    }
+    .thumb{ width:100%; height:auto; overflow:visible; background:#f1f5f9; }
+    .thumb img{ display:block; width:100%; height:auto; }
     [data-theme="dark"] .thumb{background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(6,182,212,.12))}
 
     .info{padding:12px;display:flex;flex-direction:column;gap:6px}
@@ -102,10 +92,10 @@
     .form .row-2{display:grid;grid-template-columns:1fr;gap:.8em}
     @media(min-width:520px){ .form .row-2{grid-template-columns:1fr 1fr} }
     .form label{font-size:.92em;color:var(--muted)}
-    .form input,.form textarea{
+    .form input,.form textarea,.form select{
       width:100%;padding:.75em .9em;border-radius:12px;border:1px solid rgba(148,163,184,.25);background:#fff;color:var(--text)
     }
-    [data-theme="dark"] .form input,[data-theme="dark"] .form textarea{background:#0b1220;border-color:#334155;color:#e2e8f0}
+    [data-theme="dark"] .form input,[data-theme="dark"] .form textarea,[data-theme="dark"] .form select{background:#0b1220;border-color:#334155;color:#e2e8f0}
     .error{color:#b91c1c;font-size:.9em;margin-top:-.4em}
   </style>
 </head>
@@ -174,19 +164,27 @@
         <div class="form">
           <div class="row-2">
             <div>
-              <label for="custName">Nombre y apellido</label>
+              <label for="custName">Nombre y apellido *</label>
               <input id="custName" autocomplete="name" placeholder="Ej: Juan Pérez">
               <div id="errName" class="error" style="display:none">Ingresá tu nombre y apellido.</div>
             </div>
             <div>
-              <label for="custAddress">Domicilio de entrega</label>
+              <label for="custAddress">Domicilio de entrega *</label>
               <input id="custAddress" autocomplete="street-address" placeholder="Calle, número, barrio">
               <div id="errAddress" class="error" style="display:none">Ingresá tu domicilio.</div>
             </div>
           </div>
+
+          <!-- Franja horaria dinámica (30 minutos) -->
+          <div>
+            <label for="custSlot">Franja horaria de entrega *</label>
+            <select id="custSlot"></select>
+            <div id="errSlot" class="error" style="display:none">Elegí una franja horaria.</div>
+          </div>
+
           <div>
             <label for="custNotes">Notas (opcional)</label>
-            <textarea id="custNotes" rows="2" placeholder="Indicaciones adicionales, horario, timbre, etc."></textarea>
+            <textarea id="custNotes" rows="2" placeholder="Indicaciones adicionales, timbre, etc."></textarea>
           </div>
         </div>
 
@@ -203,7 +201,7 @@
 
   <script>
     // ===== Config =====
-    const IMAGE_BASE = "https://raw.githubusercontent.com/la-peruana/laperuana/main/"; // raíz del repo
+    const IMAGE_BASE = "https://raw.githubusercontent.com/la-peruana/laperuana/main/";
     const WHATSAPP_NUMBER = "5493435075991"; // sin + ni espacios
 
     // ===== Utilidades =====
@@ -373,14 +371,12 @@
       ]
     };
 
-    // Normalizar rutas de imagen (encode nombres con espacios/acentos)
+    // Normalizar rutas de imagen (encode archivos con espacios/acentos)
     Object.keys(Catalog).forEach(k=>{
       Catalog[k] = Catalog[k].map(p => ({
         ...p,
         image: p.image
-          ? (p.image.startsWith('http')
-              ? p.image
-              : IMAGE_BASE + encodeURIComponent(p.image))
+          ? (p.image.startsWith('http') ? p.image : IMAGE_BASE + encodeURIComponent(p.image))
           : undefined
       }));
     });
@@ -390,7 +386,7 @@
 
     const User = {
       key: "shop_user_v1",
-      data: { name:"", address:"", notes:"" },
+      data: { name:"", address:"", notes:"", slot:"" },
       load(){
         try { const v = JSON.parse(localStorage.getItem(this.key));
           if(v && typeof v==='object') this.data = {...this.data, ...v};
@@ -416,11 +412,97 @@
       subtotal(){ return this.items().reduce((a,b)=>a+b.price*b.qty,0) }
     };
 
-    // ===== UI =====
+    // ===== Horarios dinámicos (30 minutos) =====
+    // Ventanas de atención (editá acá si cambian): 12:00–15:00 y 19:00–21:00
+    const OPENING_WINDOWS = [
+      { start:[12,0], end:[15,0] },
+      { start:[19,0], end:[21,0] }
+    ];
+    const SLOT_DURATION_MIN = 30;  // cada franja dura 30'
+    const ASAP_MIN_PREP   = 30;    // “Lo antes posible”: 30–60 min
+    const DAY_NAMES = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+
+    const toMinutes = (h,m)=> h*60 + m;
+    const pad2 = v => String(v).padStart(2,"0");
+
+    function nowLocal(){
+      const d = new Date();
+      return { h:d.getHours(), m:d.getMinutes(), wd:d.getDay(), date:d };
+    }
+    function generateAllSlots(){
+      const slots = [];
+      OPENING_WINDOWS.forEach(w=>{
+        const startMin = toMinutes(w.start[0], w.start[1]);
+        const endMin   = toMinutes(w.end[0],   w.end[1]);
+        for(let t = startMin; t + SLOT_DURATION_MIN <= endMin; t += SLOT_DURATION_MIN){
+          slots.push({ start:t, end:t + SLOT_DURATION_MIN });
+        }
+      });
+      return slots;
+    }
+    function fmtSlotLabel(slotMin, dayShift=0){
+      const sH = Math.floor(slotMin.start/60), sM = slotMin.start % 60;
+      const eH = Math.floor(slotMin.end/60),   eM = slotMin.end   % 60;
+      const label = `${pad2(sH)}:${pad2(sM)} – ${pad2(eH)}:${pad2(eM)}`;
+      if(dayShift===1) return `${label} (mañana)`;
+      if(dayShift>1){
+        const d = new Date(); d.setDate(d.getDate()+dayShift);
+        return `${label} (${DAY_NAMES[d.getDay()]})`;
+      }
+      return label;
+    }
+    function buildAvailableSlots(){
+      const {h, m} = nowLocal();
+      const minutesNow = h*60 + m;
+      const all = generateAllSlots();
+      const firstStart = toMinutes(OPENING_WINDOWS[0].start[0], OPENING_WINDOWS[0].start[1]);
+      const lastEnd    = toMinutes(
+        OPENING_WINDOWS[OPENING_WINDOWS.length-1].end[0],
+        OPENING_WINDOWS[OPENING_WINDOWS.length-1].end[1]
+      );
+      const asapVisible = minutesNow >= (firstStart - ASAP_MIN_PREP) && minutesNow <= (lastEnd - ASAP_MIN_PREP);
+
+      // franjas de hoy cuyo *fin* > (ahora + preparación)
+      let today = all
+        .filter(s => s.end > (minutesNow + ASAP_MIN_PREP))
+        .map(s => ({ value: fmtSlotLabel(s,0), text: fmtSlotLabel(s,0) }));
+
+      let dayShift = 0;
+      if (today.length === 0){
+        dayShift = 1; // mañana
+        today = all.map(s => ({ value: fmtSlotLabel(s,1), text: fmtSlotLabel(s,1) }));
+      }
+
+      const options = [];
+      options.push({value:"", text:"Elegí una opción"});
+      if (asapVisible && dayShift===0){
+        options.push({ value: "Lo antes posible (30–60 min)", text: "Lo antes posible (30–60 min)" });
+      }
+      return options.concat(today);
+    }
+    function populateSlotSelect(){
+      const sel = document.getElementById('custSlot');
+      const prev = (document.getElementById('custSlot').value || (window.User?.data?.slot) || "").trim();
+      const opts = buildAvailableSlots();
+      sel.innerHTML = "";
+      opts.forEach(o=>{
+        const op = document.createElement("option");
+        op.value = o.value; op.textContent = o.text;
+        sel.appendChild(op);
+      });
+      if (prev && opts.some(o=>o.value===prev)){
+        sel.value = prev;
+      } else {
+        sel.value = "";
+        if (window.User) User.save({slot:""});
+      }
+    }
+
+    // ===== UI / Interacciones =====
     const toast = (msg) => { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400) };
 
     const UI = {
-      step: "cart", // "cart" | "details"
+      step: "cart",
       init(){
         User.load();
         document.documentElement.setAttribute("data-theme", State.theme);
@@ -447,11 +529,11 @@
         };
         document.getElementById("btnBack").onclick = ()=> { this.step="cart"; this.showStep(); };
 
-        // Autoguardado + actualización del link de WhatsApp
-        const bindSave = (id, key) => {
+        // Autoguardado + refresco de link de WhatsApp
+        const bindSave = (id, key, evt='input') => {
           const el = document.getElementById(id);
-          el.addEventListener('input', () => {
-            const value = el.value; // guardamos mientras escribe
+          el.addEventListener(evt, () => {
+            const value = el.value;
             User.save({ [key]: value });
             this.updateWA();
           });
@@ -459,6 +541,7 @@
         bindSave("custName","name");
         bindSave("custAddress","address");
         bindSave("custNotes","notes");
+        bindSave("custSlot","slot","change");
       },
       showStep(){
         const cartStep = document.getElementById("cartStep");
@@ -478,7 +561,7 @@
         const el = document.getElementById("cats"); el.innerHTML="";
         Categories.forEach(c=>{ const b=document.createElement("button"); b.className=(State.cat===c.id?"active":""); b.innerHTML=`<i class="fa-solid ${c.icon}"></i> ${c.name}`; b.onclick=()=>{ State.cat=c.id; this.cats(); this.grid(); }; el.appendChild(b); });
       },
-      productsOf(c){ return Catalog[c.id] || [] },
+      productsOf(c){ return (Catalog[c.id] || []) },
       grid(){
         const wrap = document.getElementById("grid"); wrap.innerHTML="";
         const cats = State.q ? Categories : Categories.filter(c=>c.id===State.cat);
@@ -552,7 +635,6 @@
         });
         document.getElementById('cartTotalModal').textContent = `Total: ${fmt(total)}`;
 
-        // Delegación de eventos para +/-/quitar
         list.onclick = (e)=>{
           const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; const action = btn.dataset.action; if(!id||!action) return;
           if(action==='dec'){ Cart.dec(id); }
@@ -562,10 +644,14 @@
         };
       },
       renderDetails(){
-        // Prefill desde localStorage
+        populateSlotSelect(); // genera opciones según la hora actual
         document.getElementById('custName').value = User.data.name || "";
         document.getElementById('custAddress').value = User.data.address || "";
         document.getElementById('custNotes').value = User.data.notes || "";
+        if (User.data.slot) {
+          const sel = document.getElementById('custSlot');
+          if ([...sel.options].some(o=>o.value===User.data.slot)) sel.value = User.data.slot;
+        }
         document.getElementById('cartTotalModal2').textContent = `Total: ${fmt(Cart.subtotal())}`;
         this.updateWA();
       },
@@ -573,15 +659,18 @@
         const name = (document.getElementById('custName').value || "").trim();
         const address = (document.getElementById('custAddress').value || "").trim();
         const notes = (document.getElementById('custNotes').value || "").trim();
-        return {name,address,notes};
+        const slot = (document.getElementById('custSlot').value || "").trim();
+        return {name,address,notes,slot};
       },
       validateUser(){
-        const {name,address} = this.getUser();
+        const {name,address,slot} = this.getUser();
         let ok = true;
         const errN = document.getElementById('errName');
         const errA = document.getElementById('errAddress');
+        const errS = document.getElementById('errSlot');
         if(!name){ errN.style.display='block'; ok=false; } else { errN.style.display='none'; }
         if(!address){ errA.style.display='block'; ok=false; } else { errA.style.display='none'; }
+        if(!slot){ errS.style.display='block'; ok=false; } else { errS.style.display='none'; }
         return ok;
       },
       whatsAppMessage(items,total,user){
@@ -591,6 +680,7 @@
           `\n*Datos del cliente*`,
           `• Nombre: ${user.name}`,
           `• Domicilio: ${user.address}`,
+          `• Franja horaria: ${user.slot}`,
           user.notes ? `• Notas: ${user.notes}` : null
         ].filter(Boolean);
         return [...head, `\n*Detalle:*`, ...lines, `\n*Total:* ${fmt(total)}`, `\n`, ...datos].join("\n");
@@ -616,6 +706,15 @@
 
     // === Init ===
     UI.init();
+
+    // Refresco automático de franjas (cada 2 min) por si el usuario deja abierto el modal
+    setInterval(()=>{
+      if (!document.getElementById('detailsStep').classList.contains('hidden')) {
+        const current = document.getElementById('custSlot').value;
+        populateSlotSelect();
+        if (document.getElementById('custSlot').value !== current) UI.updateWA();
+      }
+    }, 120000);
   </script>
 </body>
 </html>
